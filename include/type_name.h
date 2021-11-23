@@ -24,6 +24,7 @@
 #ifndef PARAMETERS_TYPE_NAME_H
 #define PARAMETERS_TYPE_NAME_H
 
+#include <string>
 #include <string_view>
 
 namespace parameters {
@@ -72,6 +73,11 @@ constexpr std::string_view type_name() {
     constexpr auto suffix_length = detail::wrapped_type_name_suffix_length();
     constexpr auto type_name_length = wrapped_name.length() - prefix_length - suffix_length;
     return wrapped_name.substr(prefix_length, type_name_length);
+}
+
+template <typename T>
+constexpr std::string type_name_str() {
+    return std::string(type_name<T>());
 }
 
 }

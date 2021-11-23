@@ -28,179 +28,242 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <set>
+#include <stdexcept>
 #include <string>
 
-#ifndef PARAMETERS_LIMITS_H
 #include "limits.h"
-#endif
-
-#ifndef PARAMETERS_TRANSFORM_H
 #include "transform.h"
-#endif
-
-#ifndef PARAMETERS_TYPE_NAME_H
 #include "type_name.h"
-#endif
+#include "unit.h"
 
 namespace parameters {
 
-class Flag {
-private:
-    static inline const std::string _name = "";
-    bool _value;
-
+template<typename T>
+class ParameterBase {
 public:
-    static const std::string get_name() { return _name; }
-    bool get_value() const { return _value; }
+    virtual T get_default() const = 0;
+    virtual std::string get_desc() const = 0;
+    virtual bool get_fixed() const = 0;
+    virtual bool get_free() const = 0;
+    virtual std::string get_label() const = 0;
+    virtual const Limits<T> & get_limits() const = 0;
+    virtual T get_min() const = 0;
+    virtual T get_max() const = 0;
+    virtual std::string get_name() const = 0;
+    virtual const Transform<T> & get_transform() const = 0;
+    virtual T get_transform_derivative() const = 0;
+    virtual T get_value() const = 0;
+    virtual T get_value_transformed() const = 0;
+    virtual const Unit & get_unit() const = 0;
 
-    void set_value(bool value) { _value = value; }
+    virtual void set_fixed(bool fixed) = 0;
+    virtual void set_free(bool free) = 0;
+    virtual void set_label(std::string label) = 0;
+    virtual void set_limits(std::shared_ptr<const Limits<T>> limits) = 0;
+    virtual void set_transform(const std::shared_ptr<const Transform<T>> transform) = 0;
+    virtual void set_value(T value) = 0;
+    virtual void set_value_transformed(T value_transformed) = 0;
+    virtual void set_unit(std::shared_ptr<const Unit> unit = nullptr) = 0;
+    virtual std::string str() const = 0;
 
-    Flag(bool value) : _value(value) {}
+
+    virtual ~ParameterBase() = default;
 };
 
 template<typename T, class C>
-class Parameter : public std::enable_shared_from_this<C> {
+class Parameter : public ParameterBase<T>, public std::enable_shared_from_this<C> {
+public:
+    using SetC = std::set<std::shared_ptr<C>>;
+
 private:
     // TODO: Remember why this class needs to exist, if it does
+    // Probably just to store the const Limits reference?
     struct Limiter {
         const Limits<T> & limits;
-        Limiter(const Limits<T> & limits) : limits(limits) {};
+        Limiter(const Limits<T> & limits_in) : limits(limits_in) {};
     };
-    class Transformer {
-    public:
+
+    struct Transformer {
         const Transform<T> & transform;
-
-        virtual T get_value_transformed() const = 0;
-        virtual T get_value_untransformed() const = 0;
-        virtual void set_value_transformed(double value_transformed) = 0;
-        virtual void set_value_untransformed(double value_untransformed) = 0;
-
-        explicit Transformer(const Transform<T> & transform) : transform(transform) {};
-        virtual ~Transformer() = default;
-    };
-    class TransformerNonNull : public Transformer {
-    private:
-        T * _value_transformed;
-
-    public:
-        T get_value_transformed() const { return *_value_transformed; }
-        T get_value_untransformed() const { return this->transform.reverse(*_value_transformed); }
-        void set_value_transformed(double value_transformed) { *_value_transformed = value_transformed; }
-        void set_value_untransformed(double value_untransformed)
-        {
-            *_value_transformed = this->transform.forward(value_untransformed);
-        }
-        TransformerNonNull(const Transform<T> & transform) : Transformer(transform)
-        {
-            _value_transformed = new T;
-        }
-        ~TransformerNonNull() { delete _value_transformed; }
-    };
-    class TransformerNone : public Transformer {
-    private:
-        const double & _value;
-    public:
-        T get_value_transformed() const { return _value; };
-        T get_value_untransformed() const { return _value; };
-        void set_value_transformed(double) {};
-        void set_value_untransformed(double) {};
-        TransformerNone(const Transform<T> & transform, const T & value) : Transformer(transform),
-            _value(value) {};
-        ~TransformerNone() {}
+        Transformer(const Transform<T> & transform_in) : transform(transform_in) {};
     };
 
-    static inline constexpr T _default = 0;
-    static inline constexpr T _min = -std::numeric_limits<T>::infinity();
-    static inline constexpr T _max = std::numeric_limits<T>::infinity();
+    static constexpr T _default = 0;
+    static constexpr T _min = -std::numeric_limits<T>::infinity();
+    static constexpr T _max = std::numeric_limits<T>::infinity();
 
-    static inline const std::string _desc = "";
-    static inline const std::string _name = "";
-
-    template<typename P> static constexpr T _default_t(decltype(P::_default) *) { return P::_default; }
-    template<typename P> static constexpr T _default_t(...) { return _default; }
-    template<typename P> static constexpr T _min_t(decltype(P::_min) *) { return P::_min; }
-    template<typename P> static constexpr T _min_t(...) { return _min; }
-    template<typename P> static constexpr T _max_t(decltype(P::_max) *) { return P::_max; }
-    template<typename P> static constexpr T _max_t(...) { return _max; }
-    template<typename P> static const std::string _desc_t(decltype(P::_desc) *) { return P::_desc; }
-    template<typename P> static const std::string _desc_t(...) { return _desc; }
-    template<typename P> static const std::string _name_t(decltype(P::_name) *) { return P::_name; }
-    template<typename P> static const std::string _name_t(...) { return _name; }
-
+    bool _free = true;
     std::unique_ptr<Limiter> _limiter;
     std::unique_ptr<Transformer> _transformer;
 
-protected:
-    T _value;
+    std::string _label;
+    SetC _inheritors;
+    SetC _modifiers;
+
     std::shared_ptr<const Limits<T>> _limits_ptr;
     std::shared_ptr<const Transform<T>> _transform_ptr;
+    std::shared_ptr<const Unit> _unit_ptr;
+    std::shared_ptr<const C> _inheritee_ptr = nullptr;
+
+    void _set_value(T value)
+    {
+        if (!(get_limits().check(value))) throw std::runtime_error(
+            "Value=" + std::to_string(value) + "beyond get_limits()=" + get_limits().str()
+        );
+        _value = value;
+    }
+
+protected:
+    T _value;
+    T _value_transformed;
+
+    void set_inheritee(std::shared_ptr<const C> inheritee) {
+        _inheritee_ptr = inheritee == nullptr ? nullptr : std::move(inheritee);
+    }
 
 public:
-    inline std::shared_ptr<Limits<T>> & _get_limits() { return _limits_ptr; }
-    inline std::shared_ptr<Transform<T>> & _get_transform() { return _transform_ptr; }
-    static const std::string get_desc() { return _desc_t<C>(0); }
-    static constexpr T get_default() { return _default_t<C>(0); }
-    static constexpr T get_min() { return _min_t<C>(0); }
-    static constexpr T get_max() { return _max_t<C>(0); }
-    static inline const std::string get_name() { return _name_t<C>(0); }
-    inline const Limits<T> & get_limits() const { return _limiter->limits; }
-    inline const Transform<T> & get_transform() const { return _transformer->transform; }
-    static inline const std::string get_type_name() { return std::string(type_name<C>()); }
-    T get_value() const { return _value; }
-    T get_value_transformed() const { return _transformer->get_value_transformed(); }
+    static constexpr T _get_default() { return C::_default; }
+    static constexpr std::string _get_desc() { return C::_desc; }
+    static constexpr T _get_min() { return C::_min; }
+    static constexpr T _get_max() { return C::_max; }
+    static constexpr std::string _get_name() { return C::_name; }
+
+    void add_inheritor(std::shared_ptr<C> inheritor) { 
+        if(inheritor == nullptr) throw std::runtime_error("Can't add null inheritor to " + this->str());
+        if(!inheritor->get_free()) "Can't add_inheritor(" + inheritor->str() + ") with fixed inheritor";
+        if(!inheritor->get_inheritors().empty()) throw std::runtime_error("Can't add_inheritor(" + 
+            inheritor->str() + ") with inheritors of its own; inheritance may not be nested");
+        _inheritors.insert(inheritor);
+    }
+    void add_modifier(std::shared_ptr<C> modifier) { 
+        if(modifier == nullptr) throw std::runtime_error("Can't add null modifier to " + this->str());
+        if(_modifiers == nullptr) _modifiers = std::make_unique<SetC>();
+        _modifiers.insert(modifier);
+    }
+
+    std::string get_desc() const override { return _get_desc(); }
+    T get_default() const override { return _get_default(); }
+    bool get_fixed() const override { return !_free; }
+    bool get_free() const override { return _free; }
+    std::shared_ptr<const C> get_inheritee() const { return _inheritee_ptr; }
+    SetC get_inheritors() const { return _inheritors; }
+    std::string get_label() const override { return _label; }
+    const Limits<T> & get_limits() const override { return _limiter->limits; }
+    T get_min() const override { return _get_min(); }
+    T get_max() const override { return _get_max(); }
+    SetC get_modifiers() const { return _modifiers; }
+    std::string get_name() const override { return _get_name(); }
+    const Transform<T> & get_transform() const override { return _transformer->transform; }
+    T get_transform_derivative() const override {
+        return this->get_transform().derivative(this->get_value());
+    }
+    static const std::string get_type_name() { return std::string(type_name<C>()); }
+    const Unit & get_unit() const override { return *_unit_ptr; }
+    T get_value() const override { return _value; }
+    T get_value_transformed() const { return _value_transformed; }
 
     std::shared_ptr<C> ptr() { return this->shared_from_this(); }
 
+    void remove_inheritor(std::shared_ptr<C> inheritor) {
+        if(inheritor == nullptr) throw std::runtime_error("Can't remove null inheritor from " + this->str());
+        _inheritors->erase(inheritor); 
+    }
+
+    void remove_modifier(std::shared_ptr<C> modifier) {
+        if(modifier == nullptr) throw std::runtime_error("Can't remove null modifier from " + this->str());
+        _modifiers->erase(modifier); 
+    }
+
+    void set_fixed(bool fixed) override { set_free(!fixed); }
+    void set_free(bool free) override {
+        if(_inheritee_ptr != nullptr) "Can't set this=" + this->str() + " free while it inherits from "
+            "inheritee = " + _inheritee_ptr->str();
+        _free = free;
+    }
+    void set_label(std::string label) override { _label = std::move(label); }
+    void set_inheritors(const SetC inheritors)
+    {
+        _inheritors = inheritors;
+    }
     void set_limits(std::shared_ptr<const Limits<T>> limits) {
-        if (limits == nullptr)
+        if (limits == nullptr) 
         {
             _limiter = std::make_unique<Limiter>(limits_maximal);
         } else {
             if (!((limits->get_min() >= this->get_min()) && (limits->get_max() <= this->get_max()))) {
-                std::string error =
-                    this->str() + ".set_limits(" + limits->str() + ") sets limits that are less"
-                                                                    " restrictive than the minimum=" +
-                    Limits<T>(this->get_min(), this->get_max()).str();
+                std::string error = get_type_name() + ".set_limits(" + limits->str()
+                    + ") sets limits that are less restrictive than the minimum="
+                    + limits_maximal.str();
                 throw std::runtime_error(error);
             }
-            _limits_ptr = limits;
-            _limiter = std::make_unique<Limiter>(*limits);
+            _limits_ptr = std::move(limits);
+            _limiter = std::make_unique<Limiter>(*_limits_ptr);
+
         }
     }
-    void set_transform(std::shared_ptr<const Transform<T>> transform) {
-        if (transform == nullptr)
-        {
-            _transformer = std::make_unique<TransformerNone>(*transform, _value);
+    void set_modifiers(const SetC modifiers)
+    {   
+        _modifiers = modifiers;
+    }
+    void set_transform(const std::shared_ptr<const Transform<T>> transform) {
+        if(transform == nullptr) {
+            // TODO: determine why passing transform_none as arg here returns:
+            // error: modification of '<temporary>' is not a constant expression
+            // whereas get_transform_unit<T>() results in a segfault
+            // (iff Transform has a virtual destructor)
+            _transformer = std::make_unique<Transformer>(transform_none);
         } else {
-            _transform_ptr = transform;
-            _transformer = std::make_unique<TransformerNonNull>(*transform);
+            _transform_ptr = std::move(transform);
+            _transformer = std::make_unique<Transformer>(*_transform_ptr);
         }
+        _value_transformed = _transformer->transform.forward(_value);
     }
+
     void set_value(T value) {
-        if (!(get_limits().check(value)))
-            throw std::runtime_error("Value=" + std::to_string(value)
-                                        + "!<> get_limits()=" + get_limits().str());
-        _value = value;
-        _transformer->set_value_untransformed(value);
+        _set_value(value);
+        double value_new = this->get_value();
+        _value_transformed = _transformer->transform.forward(value_new);
+        for(auto & inheritor : _inheritors) inheritor->set_value(value_new);
     };
+    
     void set_value_transformed(T value_transformed) {
-        _transformer->set_value_transformed(value_transformed);
-        set_value(_transformer->get_value_untransformed());
+        _set_value(_transformer->transform.reverse(value_transformed));
+        _value_transformed = _transformer->transform.forward(this->get_value());
+        for(auto & inheritor : _inheritors) inheritor->set_value_transformed(_value_transformed);
+    }
+
+    void set_unit(std::shared_ptr<const Unit> unit = nullptr) {
+        _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
     std::string str() const {
         return get_type_name() + "(" + std::to_string(_value) + "," + get_limits().str() + ")";
     }
 
-    static constexpr const Limits<T> limits_maximal = Limits<T>(get_min(), get_max(), type_name<C>(), ".limits_maximal");
-    static constexpr const UnitTransform<T> transform_none = UnitTransform<T>();
+    static constexpr const Limits<T> limits_maximal = Limits<T>(_get_min(), _get_max(),
+        type_name<C>(), ".limits_maximal");
+    static constexpr const UnitTransform<T> & transform_none = get_transform_unit<T>();
 
-    Parameter(T value = get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
-                std::shared_ptr<const Transform<T>> transform = nullptr)
-    {
+    Parameter(
+        T value = _get_default(),
+        std::shared_ptr<const Limits<T>> limits = nullptr,
+        const std::shared_ptr<const Transform<T>> transform = nullptr,
+        std::shared_ptr<const Unit> unit = nullptr,
+        bool fixed = false,
+        std::string label = "",
+        const SetC & inheritors = {},
+        const SetC & modifiers = {}
+    ) : ParameterBase<T>() {
         set_limits(limits);
-        set_transform(transform);
-        set_value(value);
+        _value = value;
+        set_transform(transform == nullptr ? nullptr : std::move(transform));
+        // inheritors need to go before value, which is set by set_transform
+        set_inheritors(inheritors);
+        set_modifiers(modifiers);
+        set_unit(unit);
+        set_fixed(fixed);
+        set_label(label);
     }
     ~Parameter() {};
 };

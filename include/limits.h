@@ -27,13 +27,8 @@
 #include <stdexcept>
 #include <string_view>
 
-#ifndef PARAMETERS_TRANSFORM_H
 #include "transform.h"
-#endif
-
-#ifndef PARAMETERS_TYPE_NAME_H
 #include "type_name.h"
-#endif
 
 namespace parameters {
 
@@ -44,7 +39,7 @@ class Limits {
 private:
     T _min;
     T _max;
-    const std::string_view _name;
+    const std::string_view _name = _limits_name_default;
     const std::string_view _suffix = "";
 
 
@@ -80,11 +75,11 @@ public:
         _max = max;
     }
     void set_min(T min) {
-        _check_min(_min);
+        _check_min(min);
         _min = min;
     };
     void set_max(T max) {
-        _check_max(_max);
+        _check_max(max);
         _max = max;
     };
 

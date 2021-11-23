@@ -5,15 +5,19 @@
 #include <cfloat>
 #include <iostream>
 
-#ifndef PARAMETERS_PARAMETER_H
 #include "parameter.h"
-#endif
-
-#ifndef PARAMETERS_TRANSFORMS_H
 #include "transforms.h"
-#endif
+#include "type_name.h"
+#include "unit.h"
 
-using namespace parameters;
+namespace parameters {
+namespace {
+
+static const std::string name_unit_none = "None";
+class UnitNone : public Unit {
+public:
+    std::string get_name() const { return name_unit_none; }
+};
 
 struct RealParameter : public Parameter<double, RealParameter> {
     static inline const std::string _desc = "Real, potentially infinite parameter";
@@ -35,13 +39,22 @@ struct PositiveParameter : public Parameter<double, PositiveParameter> {
     using Parameter<double, PositiveParameter>::Parameter;
 };
 
-int main()
+int _main()
 {
     std::cout << "Testing standard parameters" << std::endl;
+    auto unit = std::make_shared<UnitNone>();
     auto real = RealParameter();
+    real.set_unit(unit);
     auto nonneg = NonNegativeParameter();
-    std::cout << nonneg.str() << "," << nonneg.get_name() << "," << nonneg.get_desc() << std::endl;
+    std::cout << nonneg.str() << "," << nonneg.get_name() << "," << nonneg.get_desc() << ","
+        << nonneg.get_min() << std::endl;
     auto pos = PositiveParameter();
+    std::cout << type_name<PositiveParameter>() << " == " << type_name_str<PositiveParameter>() << std::endl;
 
     return EXIT_SUCCESS;
 }
+static const int RESULT = _main();
+}
+}
+
+int main() { return _main(); }
