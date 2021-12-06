@@ -2,6 +2,7 @@
 // Created by dtaranu on 4/8/21.
 //
 
+#include <assert.h>
 #include <cfloat>
 #include <iostream>
 
@@ -46,6 +47,7 @@ int _main()
     auto real = RealParameter();
     real.set_unit(unit);
     auto nonneg = NonNegativeParameter();
+    assert(nonneg.get_min() == 0);
     std::cout << nonneg.str() << "," << nonneg.get_name() << "," << nonneg.get_desc() << ","
         << nonneg.get_min() << std::endl;
     auto pos = PositiveParameter();
@@ -53,8 +55,9 @@ int _main()
 
     return EXIT_SUCCESS;
 }
+// TODO: Remove this once made part of a unit test
 static const int RESULT = _main();
 }
 }
 
-int main() { return _main(); }
+int main() { return RESULT; }

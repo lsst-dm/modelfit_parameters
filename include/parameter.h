@@ -124,16 +124,17 @@ protected:
 
 public:
     static constexpr T _get_default() { return C::_default; }
-    static constexpr std::string _get_desc() { return C::_desc; }
+    static const std::string _get_desc() { return C::_desc; }
     static constexpr T _get_min() { return C::_min; }
     static constexpr T _get_max() { return C::_max; }
-    static constexpr std::string _get_name() { return C::_name; }
+    static const std::string _get_name() { return C::_name; }
 
     void add_inheritor(std::shared_ptr<C> inheritor) { 
         if(inheritor == nullptr) throw std::runtime_error("Can't add null inheritor to " + this->str());
-        if(!inheritor->get_free()) "Can't add_inheritor(" + inheritor->str() + ") with fixed inheritor";
-        if(!inheritor->get_inheritors().empty()) throw std::runtime_error("Can't add_inheritor(" + 
-            inheritor->str() + ") with inheritors of its own; inheritance may not be nested");
+        if(!inheritor->get_free()) throw std::runtime_error("Can't add_inheritor(" + inheritor->str()
+            + ") with fixed inheritor");
+        if(!inheritor->get_inheritors().empty()) throw std::runtime_error("Can't add_inheritor("
+            + inheritor->str() + ") with inheritors of its own; inheritance may not be nested");
         _inheritors.insert(inheritor);
     }
     void add_modifier(std::shared_ptr<C> modifier) { 
@@ -161,7 +162,10 @@ public:
     static const std::string get_type_name() { return std::string(type_name<C>()); }
     const Unit & get_unit() const override { return *_unit_ptr; }
     T get_value() const override { return _value; }
-    T get_value_transformed() const { return _value_transformed; }
+    T get_value_transformed() const override { return _value_transformed; }
+
+    static constexpr const Limits<T> limits_maximal = Limits<T>(_get_min(), _get_max(),
+        type_name<C>(), ".limits_maximal");
 
     std::shared_ptr<C> ptr() { return this->shared_from_this(); }
 
@@ -186,7 +190,7 @@ public:
     {
         _inheritors = inheritors;
     }
-    void set_limits(std::shared_ptr<const Limits<T>> limits) {
+    void set_limits(std::shared_ptr<const Limits<T>> limits) override {
         if (limits == nullptr) 
         {
             _limiter = std::make_unique<Limiter>(limits_maximal);
@@ -206,7 +210,7 @@ public:
     {   
         _modifiers = modifiers;
     }
-    void set_transform(const std::shared_ptr<const Transform<T>> transform) {
+    void set_transform(const std::shared_ptr<const Transform<T>> transform) override {
         if(transform == nullptr) {
             // TODO: determine why passing transform_none as arg here returns:
             // error: modification of '<temporary>' is not a constant expression
@@ -220,29 +224,27 @@ public:
         _value_transformed = _transformer->transform.forward(_value);
     }
 
-    void set_value(T value) {
+    void set_value(T value) override {
         _set_value(value);
         double value_new = this->get_value();
         _value_transformed = _transformer->transform.forward(value_new);
         for(auto & inheritor : _inheritors) inheritor->set_value(value_new);
     };
     
-    void set_value_transformed(T value_transformed) {
+    void set_value_transformed(T value_transformed) override {
         _set_value(_transformer->transform.reverse(value_transformed));
         _value_transformed = _transformer->transform.forward(this->get_value());
         for(auto & inheritor : _inheritors) inheritor->set_value_transformed(_value_transformed);
     }
 
-    void set_unit(std::shared_ptr<const Unit> unit = nullptr) {
+    void set_unit(std::shared_ptr<const Unit> unit = nullptr) override {
         _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
-    std::string str() const {
+    std::string str() const override {
         return get_type_name() + "(" + std::to_string(_value) + "," + get_limits().str() + ")";
     }
 
-    static constexpr const Limits<T> limits_maximal = Limits<T>(_get_min(), _get_max(),
-        type_name<C>(), ".limits_maximal");
     static constexpr const UnitTransform<T> & transform_none = get_transform_unit<T>();
 
     Parameter(

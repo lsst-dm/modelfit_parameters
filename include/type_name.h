@@ -76,7 +76,7 @@ constexpr std::string_view type_name() {
 }
 
 template <typename T>
-constexpr std::string type_name_str() {
+const std::string type_name_str() {
     return std::string(type_name<T>());
 }
 
