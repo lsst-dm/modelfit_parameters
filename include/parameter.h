@@ -67,6 +67,17 @@ public:
     virtual void set_unit(std::shared_ptr<const Unit> unit = nullptr) = 0;
     virtual std::string str() const = 0;
 
+    friend bool operator == (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+        return &first == &second;
+    }
+
+    friend bool operator != (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+        return !(first == second);
+    }
+
+    friend bool operator < (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+        return &first < &second;
+    }
 
     virtual ~ParameterBase() = default;
 };
