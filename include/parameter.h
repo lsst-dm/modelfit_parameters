@@ -48,6 +48,7 @@ public:
     virtual bool get_free() const = 0;
     virtual std::string get_label() const = 0;
     virtual const Limits<T> & get_limits() const = 0;
+    virtual bool get_linear() const = 0;
     virtual T get_min() const = 0;
     virtual T get_max() const = 0;
     virtual std::string get_name() const = 0;
@@ -67,6 +68,17 @@ public:
     virtual void set_unit(std::shared_ptr<const Unit> unit = nullptr) = 0;
     virtual std::string str() const = 0;
 
+    friend bool operator == (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+        return &first == &second;
+    }
+
+    friend bool operator != (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+        return !(first == second);
+    }
+
+    friend bool operator < (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+        return &first < &second;
+    }
 
     virtual ~ParameterBase() = default;
 };
@@ -92,6 +104,7 @@ private:
     static constexpr T _default = 0;
     static constexpr T _min = -std::numeric_limits<T>::infinity();
     static constexpr T _max = std::numeric_limits<T>::infinity();
+    static constexpr bool _linear = false;
 
     bool _free = true;
     std::unique_ptr<Limiter> _limiter;
@@ -125,6 +138,7 @@ protected:
 public:
     static constexpr T _get_default() { return C::_default; }
     static const std::string _get_desc() { return C::_desc; }
+    static constexpr bool _get_linear() { return C::_linear; }
     static constexpr T _get_min() { return C::_min; }
     static constexpr T _get_max() { return C::_max; }
     static const std::string _get_name() { return C::_name; }
@@ -151,6 +165,7 @@ public:
     SetC get_inheritors() const { return _inheritors; }
     std::string get_label() const override { return _label; }
     const Limits<T> & get_limits() const override { return _limiter->limits; }
+    bool get_linear() const override { return _get_linear(); }
     T get_min() const override { return _get_min(); }
     T get_max() const override { return _get_max(); }
     SetC get_modifiers() const { return _modifiers; }
