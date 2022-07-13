@@ -1,5 +1,6 @@
 # Meson/build
-build/
+build
+builddir
 
 # IDE folders and files
 .cache/
