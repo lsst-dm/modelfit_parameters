@@ -48,6 +48,7 @@ public:
     virtual bool get_free() const = 0;
     virtual std::string get_label() const = 0;
     virtual const Limits<T> & get_limits() const = 0;
+    virtual const Limits<T> & get_limits_maximal() const = 0;
     virtual bool get_linear() const = 0;
     virtual T get_min() const = 0;
     virtual T get_max() const = 0;
@@ -122,7 +123,7 @@ private:
     void _set_value(T value)
     {
         if (!(get_limits().check(value))) throw std::runtime_error(
-            "Value=" + std::to_string(value) + "beyond get_limits()=" + get_limits().str()
+            "Value=" + std::to_string(value) + " beyond get_limits()=" + get_limits().str()
         );
         _value = value;
     }
@@ -131,11 +132,6 @@ protected:
     T _value;
     T _value_transformed;
 
-    void set_inheritee(std::shared_ptr<const C> inheritee) {
-        _inheritee_ptr = inheritee == nullptr ? nullptr : std::move(inheritee);
-    }
-
-public:
     static constexpr T _get_default() { return C::_default; }
     static const std::string _get_desc() { return C::_desc; }
     static constexpr bool _get_linear() { return C::_linear; }
@@ -143,6 +139,14 @@ public:
     static constexpr T _get_max() { return C::_max; }
     static const std::string _get_name() { return C::_name; }
 
+    static constexpr const Limits<T> _limits_maximal = Limits<T>(_get_min(), _get_max(),
+        type_name<C>(), ".limits_maximal");
+
+    void set_inheritee(std::shared_ptr<const C> inheritee) {
+        _inheritee_ptr = inheritee == nullptr ? nullptr : std::move(inheritee);
+    }
+
+public:
     void add_inheritor(std::shared_ptr<C> inheritor) { 
         if(inheritor == nullptr) throw std::runtime_error("Can't add null inheritor to " + this->str());
         if(!inheritor->get_free()) throw std::runtime_error("Can't add_inheritor(" + inheritor->str()
@@ -164,6 +168,7 @@ public:
     std::shared_ptr<const C> get_inheritee() const { return _inheritee_ptr; }
     SetC get_inheritors() const { return _inheritors; }
     std::string get_label() const override { return _label; }
+    const Limits<T> & get_limits_maximal() const override { return _limits_maximal; }
     const Limits<T> & get_limits() const override { return _limiter->limits; }
     bool get_linear() const override { return _get_linear(); }
     T get_min() const override { return _get_min(); }
@@ -178,9 +183,6 @@ public:
     const Unit & get_unit() const override { return *_unit_ptr; }
     T get_value() const override { return _value; }
     T get_value_transformed() const override { return _value_transformed; }
-
-    static constexpr const Limits<T> limits_maximal = Limits<T>(_get_min(), _get_max(),
-        type_name<C>(), ".limits_maximal");
 
     std::shared_ptr<C> ptr() { return this->shared_from_this(); }
 
@@ -206,6 +208,9 @@ public:
         _inheritors = inheritors;
     }
     void set_limits(std::shared_ptr<const Limits<T>> limits) override {
+        // TODO: Fix bad_alloc when calling this without &
+	// Disable copy constructor explicitly maybe?
+	const auto & limits_maximal = this->get_limits_maximal();
         if (limits == nullptr) 
         {
             _limiter = std::make_unique<Limiter>(limits_maximal);
@@ -218,7 +223,6 @@ public:
             }
             _limits_ptr = std::move(limits);
             _limiter = std::make_unique<Limiter>(*_limits_ptr);
-
         }
     }
     void set_modifiers(const SetC modifiers)
