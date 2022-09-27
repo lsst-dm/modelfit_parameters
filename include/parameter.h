@@ -132,7 +132,6 @@ protected:
     T _value;
     T _value_transformed;
 
-    static constexpr T _get_default() { return C::_default; }
     static const std::string _get_desc() { return C::_desc; }
     static constexpr bool _get_linear() { return C::_linear; }
     static constexpr T _get_min() { return C::_min; }
@@ -147,6 +146,7 @@ protected:
     }
 
 public:
+    static constexpr T _get_default() { return C::_default; }
     void add_inheritor(std::shared_ptr<C> inheritor) { 
         if(inheritor == nullptr) throw std::runtime_error("Can't add null inheritor to " + this->str());
         if(!inheritor->get_free()) throw std::runtime_error("Can't add_inheritor(" + inheritor->str()
