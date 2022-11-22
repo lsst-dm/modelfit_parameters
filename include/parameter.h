@@ -261,7 +261,8 @@ public:
     }
 
     std::string str() const override {
-        return get_type_name() + "(" + std::to_string(_value) + "," + get_limits().str() + ")";
+        return get_type_name() + "(" + std::to_string(_value) + ", " + get_limits().str() + ", "
+            + get_transform().str() + ", fixed=" + std::to_string(get_fixed()) + ")";
     }
 
     static constexpr const UnitTransform<T> & transform_none = get_transform_unit<T>();
