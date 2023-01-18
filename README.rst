@@ -20,11 +20,18 @@ using a conda environment:
 
 PKG_CONFIG_PATH=$CONDA_PREFIX/.local/lib64/pkgconfig meson --prefix=$CONDA_PREFIX/.local builddir/
 
-Once the build command is run once to create a build directory, subsequent
-rebuilds can use the provided build.bash script.
+A full example setup script is provided in ``setup_conda.sh``.
+This defaults to  using ``$CONDA_PREFIX``, but can be configured to output
+elsewhere (e.g. ``~/.local``):
 
-Note: the default meson build directory is builddir/, to disambiguate it with
-the command `meson build`. However, many IDEs expect a default build directory
-in build/, as is typical with `cmake`. It may be convient to create a symbolic 
-link between them, e.g. `ln -s builddir build`.
+``CONDA_PREFIX=~ sh setup-conda.sh``
+
+Once the build command is run once to create the build directories, subsequent
+rebuilds can use the provided ``build.sh`` script.
+
+Note: the default meson build directory is builddir/ (build-release is used in
+setup-conda.sh), to disambiguate it with the command `meson build`. However,
+many IDEs expect a build directory in build/, as is typical with `cmake`.
+It may be convient to create a symbolic link between them, e.g.
+`ln -s build-release build`.
 

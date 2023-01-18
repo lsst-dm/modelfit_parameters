@@ -1,5 +1,6 @@
 # Meson/build
 build
+build-release
 builddir
 
 # IDE folders and files
