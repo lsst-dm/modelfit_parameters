@@ -112,7 +112,6 @@ private:
     std::unique_ptr<Transformer> _transformer;
 
     std::string _label;
-    SetC _modifiers;
 
     std::shared_ptr<const Limits<T>> _limits_ptr;
     std::shared_ptr<const Transform<T>> _transform_ptr;
@@ -141,11 +140,6 @@ protected:
 
 public:
     static constexpr T _get_default() { return C::_default; }
-    void add_modifier(std::shared_ptr<C> modifier) { 
-        if(modifier == nullptr) throw std::runtime_error("Can't add null modifier to " + this->str());
-        if(_modifiers == nullptr) _modifiers = std::make_unique<SetC>();
-        _modifiers.insert(modifier);
-    }
 
     std::string get_desc() const override { return _get_desc(); }
     T get_default() const override { return _get_default(); }
@@ -157,7 +151,6 @@ public:
     bool get_linear() const override { return _get_linear(); }
     T get_min() const override { return _get_min(); }
     T get_max() const override { return _get_max(); }
-    SetC get_modifiers() const { return _modifiers; }
     std::string get_name() const override { return _get_name(); }
     const Transform<T> & get_transform() const override { return _transformer->transform; }
     T get_transform_derivative() const override {
@@ -169,11 +162,6 @@ public:
     T get_value_transformed() const override { return _value_transformed; }
 
     std::shared_ptr<C> ptr() { return this->shared_from_this(); }
-
-    void remove_modifier(std::shared_ptr<C> modifier) {
-        if(modifier == nullptr) throw std::runtime_error("Can't remove null modifier from " + this->str());
-        _modifiers->erase(modifier); 
-    }
 
     void set_fixed(bool fixed) override { set_free(!fixed); }
     void set_free(bool free) override {
@@ -197,10 +185,6 @@ public:
             _limits_ptr = std::move(limits);
             _limiter = std::make_unique<Limiter>(*_limits_ptr);
         }
-    }
-    void set_modifiers(const SetC modifiers)
-    {   
-        _modifiers = modifiers;
     }
     void set_transform(const std::shared_ptr<const Transform<T>> transform) override {
         if(transform == nullptr) {
@@ -244,13 +228,11 @@ public:
         const std::shared_ptr<const Transform<T>> transform = nullptr,
         std::shared_ptr<const Unit> unit = nullptr,
         bool fixed = false,
-        std::string label = "",
-        const SetC & modifiers = {}
+        std::string label = ""
     ) : ParameterBase<T>() {
         set_limits(limits);
         _value = value;
         set_transform(transform == nullptr ? nullptr : std::move(transform));
-        set_modifiers(modifiers);
         set_unit(unit);
         set_fixed(fixed);
         set_label(label);
