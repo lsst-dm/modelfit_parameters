@@ -57,19 +57,18 @@ public:
 template <class T>
 class UnitTransform : public Transform<T> {
 public:
-    std::string description() const { return "Unit transform";}
-    std::string str() const { return "UnitTransform";}
+    std::string description() const { return "Unit transform"; }
+    std::string str() const { return "UnitTransform"; }
 
-    inline T derivative(T) const { return 1;}
-    inline T forward(T x) const { return x;}
-    inline T reverse(T x) const { return x;}
+    inline T derivative(T) const { return 1; }
+    inline T forward(T x) const { return x; }
+    inline T reverse(T x) const { return x; }
 };
 
 template <class T>
-static constexpr UnitTransform<T> get_transform_unit()
-{
+static constexpr UnitTransform<T> get_transform_unit() {
     return UnitTransform<T>();
 }
 #pragma GCC diagnostic pop
-}
-#endif //PARAMETERS_TRANSFORM_H
+}  // namespace parameters
+#endif  // PARAMETERS_TRANSFORM_H

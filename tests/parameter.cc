@@ -40,8 +40,7 @@ struct PositiveParameter : public Parameter<double, PositiveParameter> {
     using Parameter<double, PositiveParameter>::Parameter;
 };
 
-int _main()
-{
+int _main() {
     std::cout << "Testing standard parameters" << std::endl;
     auto unit = std::make_shared<UnitNone>();
     auto real = RealParameter();
@@ -49,7 +48,7 @@ int _main()
     auto nonneg = NonNegativeParameter();
     assert(nonneg.get_min() == 0);
     std::cout << nonneg.str() << "," << nonneg.get_name() << "," << nonneg.get_desc() << ","
-        << nonneg.get_min() << std::endl;
+              << nonneg.get_min() << std::endl;
     auto pos = PositiveParameter();
     std::cout << type_name<PositiveParameter>() << " == " << type_name_str<PositiveParameter>() << std::endl;
 
@@ -57,7 +56,7 @@ int _main()
 }
 // TODO: Remove this once made part of a unit test
 static const int RESULT = _main();
-}
-}
+}  // namespace
+}  // namespace parameters
 
 int main() { return RESULT; }

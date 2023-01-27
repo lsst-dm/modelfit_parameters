@@ -33,5 +33,5 @@ public:
     virtual std::string get_name() const = 0;
     virtual ~Unit() = default;
 };
-}
-#endif //PARAMETERS_PARAMETER_H
+}  // namespace parameters
+#endif  // PARAMETERS_PARAMETER_H
