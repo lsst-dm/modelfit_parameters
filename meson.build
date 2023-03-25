@@ -59,3 +59,6 @@ pkg_mod.generate(
 # Unit Tests
 # ==========
 subdir('tests')
+
+# Build docs
+subdir('doc')
