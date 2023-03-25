@@ -33,6 +33,7 @@
 #include <string>
 
 #include "limits.h"
+#include "object.h"
 #include "transform.h"
 #include "type_name.h"
 #include "unit.h"
@@ -67,7 +68,8 @@ public:
     virtual void set_value(T value) = 0;
     virtual void set_value_transformed(T value_transformed) = 0;
     virtual void set_unit(std::shared_ptr<const Unit> unit = nullptr) = 0;
-    virtual std::string str() const = 0;
+
+    static const UnitTransform<T> & transform_none() { return UnitTransform<T>::get(); };
 
     friend bool operator==(const ParameterBase<T>& first, const ParameterBase<T>& second) {
         return &first == &second;
@@ -134,9 +136,6 @@ protected:
     static constexpr T _get_max() { return C::_max; }
     static const std::string _get_name() { return C::_name; }
 
-    static constexpr const Limits<T> _limits_maximal =
-            Limits<T>(_get_min(), _get_max(), type_name<C>(), ".limits_maximal");
-
 public:
     static constexpr T _get_default() { return C::_default; }
 
@@ -145,7 +144,11 @@ public:
     bool get_fixed() const override { return !_free; }
     bool get_free() const override { return _free; }
     std::string get_label() const override { return _label; }
-    const Limits<T>& get_limits_maximal() const override { return _limits_maximal; }
+    const Limits<T>& get_limits_maximal() const override { 
+        static const Limits<T> limits_maximal = Limits<T>(
+            _get_min(), _get_max(), std::string(type_name<C>()) + ".limits_maximal");
+        return limits_maximal;
+    }
     const Limits<T>& get_limits() const override { return _limiter->limits; }
     bool get_linear() const override { return _get_linear(); }
     T get_min() const override { return _get_min(); }
@@ -188,7 +191,7 @@ public:
             // error: modification of '<temporary>' is not a constant expression
             // whereas get_transform_unit<T>() results in a segfault
             // (iff Transform has a virtual destructor)
-            _transformer = std::make_unique<Transformer>(transform_none);
+            _transformer = std::make_unique<Transformer>(this->transform_none());
         } else {
             _transform_ptr = std::move(transform);
             _transformer = std::make_unique<Transformer>(*_transform_ptr);
@@ -211,12 +214,18 @@ public:
         _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
-    std::string str() const override {
-        return get_type_name() + "(" + std::to_string(_value) + ", " + get_limits().str() + ", " +
-               get_transform().str() + ", fixed=" + std::to_string(get_fixed()) + ")";
+    std::string repr(bool name_keywords=false) const override {
+        return get_type_name() + "("
+            + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
+            + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
+            + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
+            + (name_keywords ? "fixed=" : "") + std::to_string(get_fixed()) + ", "
+            + (name_keywords ? "label='" : "'") + _label + "')";
     }
 
-    static constexpr const UnitTransform<T>& transform_none = get_transform_unit<T>();
+    std::string str() const override {
+        return get_type_name() + "(" + std::to_string(_value) + ")";
+    }
 
     Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
               const std::shared_ptr<const Transform<T>> transform = nullptr,

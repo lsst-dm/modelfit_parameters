@@ -24,9 +24,11 @@
 #ifndef PARAMETERS_LIMITS_H
 #define PARAMETERS_LIMITS_H
 
+#include <cctype>
 #include <stdexcept>
 #include <string_view>
 
+#include "object.h"
 #include "transform.h"
 #include "type_name.h"
 
@@ -35,7 +37,7 @@ namespace parameters {
 static const std::string _limits_name_default = "Default";
 
 template <typename T>
-class Limits {
+class Limits : public Object {
 private:
     T _min;
     T _max;
@@ -78,9 +80,17 @@ public:
         _max = max;
     };
 
-    std::string str() const {
-        return "parameters::Limits<" + std::string(type_name<T>()) + ">(min=" + std::to_string(_min) +
-               ", max=" + std::to_string(_max) + ", name=" + std::string(_name) + std::string(_suffix) + ")";
+    std::string repr(bool name_keywords=false) const override {
+        return "Limits"
+            + (name_keywords ? std::to_string(std::toupper(std::string(type_name<T>())[0]))
+                : "<" + std::string(type_name<T>()) + ">")
+            + "(" + (name_keywords ? "min=" : "") + std::to_string(_min)
+            + ", " + (name_keywords ? "max=" : "") + std::to_string(_max)
+            + ", " + (name_keywords ? "name='" : "") + std::string(_name) + std::string(_suffix) + "')";
+    }
+    std::string str() const override {
+        return "Limits(" + std::to_string(_min) +
+               ", " + std::to_string(_max) + ", '" + std::string(_name) + std::string(_suffix) + "')";
     }
 
     Limits(T min = -std::numeric_limits<T>::infinity(), T max = -std::numeric_limits<T>::infinity(),
@@ -88,13 +98,8 @@ public:
             : _min(min), _max(max), _name(name) {
         _check(min, max);
     }
-    // Used for static initialization of limits. Name/suffix exist because I can't figure out how to
-    // concatenate them
-    constexpr Limits(const T& min, const T& max, const std::string_view& name,
-                     const std::string_view& suffix = "")
-            : _min(min), _max(max), _name(name), _suffix(suffix) {
-        _check(min, max);
-    };
+
+    ~Limits() {};
 };
 
 }  // namespace parameters
