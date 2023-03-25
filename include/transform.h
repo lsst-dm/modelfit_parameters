@@ -32,16 +32,24 @@
 
 namespace parameters {
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+/**
+ * @brief A reversible transformation of a real scalar value.
+ *
+ * The transformation should be differentiable, ideally analytically.
+ *
+ * @tparam T The type of the value. Only floating point values are tested.
+ */
 template <class T>
 class Transform : public Object {
 public:
+    /// Return a description of this transform
     virtual std::string description() const = 0;
-    virtual std::string str() const = 0;
 
+    /// Return the derivative of this tranform at the value x
     virtual T derivative(T x) const = 0;
+    /// Return the transformed value of x
     virtual T forward(T x) const = 0;
+    /// Return the original value of x given a transformed value
     virtual T reverse(T x) const = 0;
 
     virtual ~Transform() = default;

@@ -36,6 +36,11 @@ namespace parameters {
 
 static const std::string _limits_name_default = "Default";
 
+/**
+ * @brief Limits for a given parameter value.
+ * 
+ * @tparam T The type of the value. Only floating point values are tested.
+ */
 template <typename T>
 class Limits : public Object {
 private:
@@ -60,21 +65,28 @@ private:
     }
 
 public:
+    /// Check if a value is within the limits
     inline bool check(T value) const { return value >= _min && value <= _max; }
+    /// Return the closest value to the input that is within the limits
     inline T clip(T value) const { return value > _max ? _max : (value < _min ? _min : value); }
 
+    /// Return the minimum
     inline T get_min() const { return _min; };
+    /// Return the maximum
     inline T get_max() const { return _max; };
 
+    /// Set the minimum and maximum
     void set(T min, T max) {
         _check(min, max);
         _min = min;
         _max = max;
     }
+    /// Set the minimum
     void set_min(T min) {
         _check_min(min);
         _min = min;
     };
+    /// Set the maximum
     void set_max(T max) {
         _check_max(max);
         _max = max;
