@@ -28,15 +28,14 @@
 
 namespace parameters {
 
-class Object
-{
+class Object {
 public:
     /// Return a full, callable string representation of this
-    virtual std::string repr(bool name_keywords=false) const = 0;
+    virtual std::string repr(bool name_keywords = false) const = 0;
     /// Return a brief string representation of this
     virtual std::string str() const = 0;
 
-    friend std::ostream & operator << (std::ostream &out, const Object &obj) {
+    friend std::ostream &operator<<(std::ostream &out, const Object &obj) {
         out << obj.str();
         return out;
     }
@@ -44,5 +43,5 @@ public:
     virtual ~Object() = default;
 };
 
-} // namespace parameters
+}  // namespace parameters
 #endif

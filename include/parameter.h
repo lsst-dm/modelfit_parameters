@@ -51,7 +51,7 @@ namespace parameters {
  *
  * This base class exists partly because e.g. Python bindings can't understand
  * CRTP. It is probably unnecessary in C++ and comes with a performance hit.
- * 
+ *
  * @tparam T The type of the value. Only floating point values are tested.
  */
 template <typename T>
@@ -106,7 +106,7 @@ public:
     /// Set the unit for this parameter instance.
     virtual void set_unit(std::shared_ptr<const Unit> unit = nullptr) = 0;
 
-    static const UnitTransform<T> & transform_none() { return UnitTransform<T>::get(); };
+    static const UnitTransform<T>& transform_none() { return UnitTransform<T>::get(); };
 
     friend bool operator==(const ParameterBase<T>& first, const ParameterBase<T>& second) {
         return &first == &second;
@@ -135,7 +135,7 @@ public:
  * with virtual methods; see ParameterBase Notes. The remaining benefits from
  * CRTP are that derived classes can be implemented simply by defining
  * static members. The implementation thereof in this class is somewhat ugly.
- * 
+ *
  * @tparam T The type of the value. Only floating point values are tested.
  * @tparam C The derived class.
  */
@@ -178,8 +178,8 @@ private:
     // Set the untransformed value, checking limits
     void _set_value(T value) {
         if (!(get_limits().check(value)))
-            throw std::runtime_error("Value=" + std::to_string(value) +
-                                     " beyond get_limits()=" + get_limits().str());
+            throw std::runtime_error("Value=" + std::to_string(value)
+                                     + " beyond get_limits()=" + get_limits().str());
         _value = value;
     }
 
@@ -209,9 +209,9 @@ public:
     /// Get a string label for this parameter instance
     std::string get_label() const override { return _label; }
     /// Get the maximal (widest possible) limits for the parameter value
-    const Limits<T>& get_limits_maximal() const override { 
-        static const Limits<T> limits_maximal = Limits<T>(
-            _get_min(), _get_max(), std::string(type_name<C>()) + ".limits_maximal");
+    const Limits<T>& get_limits_maximal() const override {
+        static const Limits<T> limits_maximal
+                = Limits<T>(_get_min(), _get_max(), std::string(type_name<C>()) + ".limits_maximal");
         return limits_maximal;
     }
     /// Get the limits for this parameter
@@ -253,9 +253,9 @@ public:
             _limiter = std::make_unique<Limiter>(limits_maximal);
         } else {
             if (!((limits->get_min() >= this->get_min()) && (limits->get_max() <= this->get_max()))) {
-                std::string error =
-                        get_type_name() + ".set_limits(" + limits->str() +
-                        ") sets limits that are less restrictive than the minimum=" + limits_maximal.str();
+                std::string error = get_type_name() + ".set_limits(" + limits->str()
+                                    + ") sets limits that are less restrictive than the minimum="
+                                    + limits_maximal.str();
                 throw std::runtime_error(error);
             }
             _limits_ptr = std::move(limits);
@@ -291,18 +291,15 @@ public:
         _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
-    std::string repr(bool name_keywords=false) const override {
-        return get_type_name() + "("
-            + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
-            + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
-            + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
-            + (name_keywords ? "fixed=" : "") + std::to_string(get_fixed()) + ", "
-            + (name_keywords ? "label='" : "'") + _label + "')";
+    std::string repr(bool name_keywords = false) const override {
+        return get_type_name() + "(" + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
+               + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
+               + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
+               + (name_keywords ? "fixed=" : "") + std::to_string(get_fixed()) + ", "
+               + (name_keywords ? "label='" : "'") + _label + "')";
     }
 
-    std::string str() const override {
-        return get_type_name() + "(" + std::to_string(_value) + ")";
-    }
+    std::string str() const override { return get_type_name() + "(" + std::to_string(_value) + ")"; }
 
     Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
               const std::shared_ptr<const Transform<T>> transform = nullptr,

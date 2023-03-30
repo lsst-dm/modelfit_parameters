@@ -6,4 +6,5 @@ AccessModifierOffset: -4
 SortIncludes: false # reordering may break existing code
 ConstructorInitializerIndentWidth: 8
 ContinuationIndentWidth: 8
+BreakBeforeBinaryOperators: true
 

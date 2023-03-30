@@ -59,11 +59,13 @@ template <class T>
 class UnitTransform : public Transform<T> {
 public:
     std::string description() const override { return "Unit transform"; }
-    static const UnitTransform<T> & get() {
+    static const UnitTransform<T>& get() {
         static const auto transform = UnitTransform<T>();
         return transform;
     }
-    std::string repr(__attribute__((unused)) bool name_keywords=false) const override { return "UnitTransform()"; }
+    std::string repr(__attribute__((unused)) bool name_keywords = false) const override {
+        return "UnitTransform()";
+    }
     std::string str() const override { return "UnitTransform()"; }
 
     inline T derivative(T) const { return 1; }

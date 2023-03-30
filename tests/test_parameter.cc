@@ -6,8 +6,7 @@
 #include "parameters.h"
 #include "transforms.h"
 
-TEST_CASE("RealParameter")
-{
+TEST_CASE("RealParameter") {
     auto transform = std::make_shared<UnitTransform<double>>();
     auto unit = std::make_shared<UnitNone>();
 
@@ -19,13 +18,9 @@ TEST_CASE("RealParameter")
     CHECK(real.str().size() > 0);
 }
 
-TEST_CASE("NonNegativeParameter")
-{
+TEST_CASE("NonNegativeParameter") {
     auto nonneg = NonNegativeParameter();
     CHECK(nonneg.get_min() == 0);
 }
 
-TEST_CASE("NonNegativeParameter")
-{
-    auto pos = PositiveParameter();
-}
+TEST_CASE("NonNegativeParameter") { auto pos = PositiveParameter(); }

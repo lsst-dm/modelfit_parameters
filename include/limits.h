@@ -38,7 +38,7 @@ static const std::string _limits_name_default = "Default";
 
 /**
  * @brief Limits for a given parameter value.
- * 
+ *
  * @tparam T The type of the value. Only floating point values are tested.
  */
 template <typename T>
@@ -92,17 +92,17 @@ public:
         _max = max;
     };
 
-    std::string repr(bool name_keywords=false) const override {
+    std::string repr(bool name_keywords = false) const override {
         return "Limits"
-            + (name_keywords ? std::to_string(std::toupper(std::string(type_name<T>())[0]))
-                : "<" + std::string(type_name<T>()) + ">")
-            + "(" + (name_keywords ? "min=" : "") + std::to_string(_min)
-            + ", " + (name_keywords ? "max=" : "") + std::to_string(_max)
-            + ", " + (name_keywords ? "name='" : "") + std::string(_name) + std::string(_suffix) + "')";
+               + (name_keywords ? std::to_string(std::toupper(std::string(type_name<T>())[0]))
+                                : "<" + std::string(type_name<T>()) + ">")
+               + "(" + (name_keywords ? "min=" : "") + std::to_string(_min) + ", "
+               + (name_keywords ? "max=" : "") + std::to_string(_max) + ", " + (name_keywords ? "name='" : "")
+               + name + "')";
     }
     std::string str() const override {
-        return "Limits(" + std::to_string(_min) +
-               ", " + std::to_string(_max) + ", '" + std::string(_name) + std::string(_suffix) + "')";
+        return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + std::string(_name) +
+               std::string(_suffix) + "')";
     }
 
     Limits(T min = -std::numeric_limits<T>::infinity(), T max = -std::numeric_limits<T>::infinity(),
@@ -111,7 +111,7 @@ public:
         _check(min, max);
     }
 
-    ~Limits() {};
+    ~Limits(){};
 };
 
 }  // namespace parameters

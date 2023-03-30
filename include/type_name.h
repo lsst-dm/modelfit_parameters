@@ -60,8 +60,8 @@ constexpr std::size_t wrapped_type_name_prefix_length() {
 }
 
 constexpr std::size_t wrapped_type_name_suffix_length() {
-    return wrapped_type_name<type_name_prober>().length() - wrapped_type_name_prefix_length() -
-           type_name<type_name_prober>().length();
+    return wrapped_type_name<type_name_prober>().length() - wrapped_type_name_prefix_length()
+           - type_name<type_name_prober>().length();
 }
 
 }  // namespace detail
