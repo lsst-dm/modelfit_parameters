@@ -25,6 +25,7 @@
 #define PARAMETERS_LIMITS_H
 
 #include <cctype>
+#include <limits>
 #include <stdexcept>
 #include <string_view>
 
@@ -33,8 +34,6 @@
 #include "type_name.h"
 
 namespace parameters {
-
-static const std::string _limits_name_default = "Default";
 
 /**
  * @brief Limits for a given parameter value.
@@ -46,8 +45,6 @@ class Limits : public Object {
 private:
     T _min;
     T _max;
-    const std::string_view _name = _limits_name_default;
-    const std::string_view _suffix = "";
 
     constexpr void _check(const T& min, const T& max) const {
         if (std::isnan(min) || std::isnan(max))
@@ -75,6 +72,8 @@ public:
     /// Return the maximum
     inline T get_max() const { return _max; };
 
+    std::string name;
+
     /// Set the minimum and maximum
     void set(T min, T max) {
         _check(min, max);
@@ -101,13 +100,12 @@ public:
                + name + "')";
     }
     std::string str() const override {
-        return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + std::string(_name) +
-               std::string(_suffix) + "')";
+        return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + name + "')";
     }
 
     Limits(T min = -std::numeric_limits<T>::infinity(), T max = -std::numeric_limits<T>::infinity(),
-           const std::string& name = _limits_name_default)
-            : _min(min), _max(max), _name(name) {
+           std::string name_ = "")
+            : _min(min), _max(max), name(name_) {
         _check(min, max);
     }
 
