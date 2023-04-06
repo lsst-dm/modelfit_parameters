@@ -1,4 +1,5 @@
 test_names = [
+    'limits',
     'parameter',
 ]
 foreach test_name : test_names

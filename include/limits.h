@@ -103,7 +103,7 @@ public:
         return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + name + "')";
     }
 
-    Limits(T min = -std::numeric_limits<T>::infinity(), T max = -std::numeric_limits<T>::infinity(),
+    Limits(T min = -std::numeric_limits<T>::infinity(), T max = std::numeric_limits<T>::infinity(),
            std::string name_ = "")
             : _min(min), _max(max), name(name_) {
         _check(min, max);
