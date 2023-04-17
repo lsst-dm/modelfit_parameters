@@ -24,80 +24,93 @@
 #ifndef PARAMETERS_LIMITS_H
 #define PARAMETERS_LIMITS_H
 
+#include <cctype>
+#include <limits>
 #include <stdexcept>
 #include <string_view>
 
+#include "object.h"
 #include "transform.h"
 #include "type_name.h"
 
 namespace parameters {
 
-static const std::string _limits_name_default = "Default";
-
-template<typename T>
-class Limits {
+/**
+ * @brief Limits for a given parameter value.
+ *
+ * @tparam T The type of the value. Only floating point values are tested.
+ */
+template <typename T>
+class Limits : public Object {
 private:
     T _min;
     T _max;
-    const std::string_view _name = _limits_name_default;
-    const std::string_view _suffix = "";
 
-
-    constexpr void _check(const T & min, const T & max) const {
-        if (std::isnan(min) || std::isnan(max)) throw std::runtime_error(
-            str() + " can't be initialized with NaN limits");
+    constexpr void _check(const T& min, const T& max) const {
+        if (std::isnan(min) || std::isnan(max))
+            throw std::runtime_error(str() + " can't be initialized with NaN limits");
         if (!(min <= max)) throw std::runtime_error(str() + " can't be initialized with !(min <= max)");
     }
 
     inline void _check_min(const T& min) const {
-        if (std::isnan(min))
-            throw std::runtime_error(str() + " set_min given NaN");
-        if (!(min <= _max))
-            throw std::runtime_error(str() + " set_min !(min_new <= max)");
+        if (std::isnan(min)) throw std::runtime_error(str() + " set_min given NaN");
+        if (!(min <= _max)) throw std::runtime_error(str() + " set_min !(min_new <= max)");
     }
     inline void _check_max(const T& max) const {
-        if (std::isnan(max))
-            throw std::runtime_error(str() + " set_max given NaN");
-        if (!(max >= _min))
-            throw std::runtime_error(str() + " set_max !(min <= max_new)");
+        if (std::isnan(max)) throw std::runtime_error(str() + " set_max given NaN");
+        if (!(max >= _min)) throw std::runtime_error(str() + " set_max !(min <= max_new)");
     }
 
 public:
+    /// Check if a value is within the limits
     inline bool check(T value) const { return value >= _min && value <= _max; }
+    /// Return the closest value to the input that is within the limits
     inline T clip(T value) const { return value > _max ? _max : (value < _min ? _min : value); }
 
+    /// Return the minimum
     inline T get_min() const { return _min; };
+    /// Return the maximum
     inline T get_max() const { return _max; };
 
+    std::string name;
+
+    /// Set the minimum and maximum
     void set(T min, T max) {
         _check(min, max);
         _min = min;
         _max = max;
     }
+    /// Set the minimum
     void set_min(T min) {
         _check_min(min);
         _min = min;
     };
+    /// Set the maximum
     void set_max(T max) {
         _check_max(max);
         _max = max;
     };
 
-    std::string str() const {
-        return "parameters::Limits<" + std::string(type_name<T>()) + ">(min=" + std::to_string(_min)
-            + ", max=" + std::to_string(_max) + ", name=" + std::string(_name) + std::string(_suffix) + ")";
+    std::string repr(bool name_keywords = false) const override {
+        return "Limits"
+               + (name_keywords ? std::to_string(std::toupper(std::string(type_name<T>())[0]))
+                                : "<" + std::string(type_name<T>()) + ">")
+               + "(" + (name_keywords ? "min=" : "") + std::to_string(_min) + ", "
+               + (name_keywords ? "max=" : "") + std::to_string(_max) + ", " + (name_keywords ? "name='" : "")
+               + name + "')";
+    }
+    std::string str() const override {
+        return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + name + "')";
     }
 
-    Limits(T min = -std::numeric_limits<T>::infinity(), T max = -std::numeric_limits<T>::infinity(),
-        const std::string & name=_limits_name_default) : _min(min), _max(max), _name(name) {
+    Limits(T min = -std::numeric_limits<T>::infinity(), T max = std::numeric_limits<T>::infinity(),
+           std::string name_ = "")
+            : _min(min), _max(max), name(name_) {
         _check(min, max);
     }
-    // Used for static initialization of limits. Name/suffix exist because I can't figure out how to concatenate them
-    constexpr Limits(const T & min, const T & max, const std::string_view & name, const std::string_view & suffix="") : 
-        _min(min), _max(max), _name(name), _suffix(suffix) {
-        _check(min, max);
-    };
+
+    ~Limits(){};
 };
 
-}
-#endif //PARAMETERS_LIMITS_H
+}  // namespace parameters
+#endif  // PARAMETERS_LIMITS_H

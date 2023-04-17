@@ -11,26 +11,11 @@ project_test_files = [
   'tests/parameter.cc',
 ]
 
-build_args = [
-]
-
-# ===================================================================
-
 # ======
 # Target
 # ======
 
 public_headers = include_directories('include')
-
-project_target = shared_library(
-  meson.project_name(),
-  [],
-  install : false,
-  c_args : build_args,
-  gnu_symbol_visibility : 'hidden',
-  include_directories : public_headers,
-)
-
 
 # =======
 # Project
@@ -51,24 +36,12 @@ pkg_mod.generate(
   name : meson.project_name(),
   filebase : meson.project_name(),
   description : project_description,
-#  subdirs : meson.project_name(),
 )
-
 
 # ==========
 # Unit Tests
 # ==========
+subdir('tests')
 
-if not meson.is_subproject()
-  add_languages('cpp')
-  subdir('tests')
-
-  test('all_tests',
-    executable(
-      'run_tests',
-      files(project_test_files),
-      dependencies : [project_dep,],#, test_dep],
-      install : false
-    )
-  )
-endif
+# Build docs
+subdir('doc')

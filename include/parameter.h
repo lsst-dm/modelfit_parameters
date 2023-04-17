@@ -33,73 +33,131 @@
 #include <string>
 
 #include "limits.h"
+#include "object.h"
 #include "transform.h"
 #include "type_name.h"
 #include "unit.h"
 
 namespace parameters {
 
-template<typename T>
-class ParameterBase {
+/**
+ * @brief Interface for parameters with values and metadata.
+ *
+ * A parameter represents a single numeric value, with metadata like a name,
+ * description, unit, as well as optional limits and a transforming function.
+ * This class is intended for use in numerical optimization.
+ *
+ * Notes
+ *
+ * This base class exists partly because e.g. Python bindings can't understand
+ * CRTP. It is probably unnecessary in C++ and comes with a performance hit.
+ *
+ * @tparam T The type of the value. Only floating point values are tested.
+ */
+template <typename T>
+class ParameterBase : public Object {
 public:
+    /// Get the default value.
     virtual T get_default() const = 0;
+    /// Get a string description for this parameter class.
     virtual std::string get_desc() const = 0;
+    /// Return whether the parameter is fixed (not free).
     virtual bool get_fixed() const = 0;
+    /// Return whether the parameter is free (not fixed).
     virtual bool get_free() const = 0;
+    /// Return a string label for this parameter instance.
     virtual std::string get_label() const = 0;
-    virtual const Limits<T> & get_limits() const = 0;
-    virtual const Limits<T> & get_limits_maximal() const = 0;
+    /// Return the limits for the untransformed value.
+    virtual const Limits<T>& get_limits() const = 0;
+    /// Return limits representing the maximum/minimum untransformed value.
+    virtual const Limits<T>& get_limits_maximal() const = 0;
+    /// Return whether the parameter is linear.
     virtual bool get_linear() const = 0;
+    /// Return the minimum value for this parameter instance.
     virtual T get_min() const = 0;
+    /// Return the maximum value for this parameter instance.
     virtual T get_max() const = 0;
+    /// Get a string name for this parameter class.
     virtual std::string get_name() const = 0;
-    virtual const Transform<T> & get_transform() const = 0;
+    /// Return the transforming function for this parameter instance.
+    virtual const Transform<T>& get_transform() const = 0;
+    /// Return the derivative of the transform for this parameter instance.
     virtual T get_transform_derivative() const = 0;
+    /// Return the untransformed value of this parameter instance.
     virtual T get_value() const = 0;
+    /// Return the transformed value of this parameter instance.
     virtual T get_value_transformed() const = 0;
-    virtual const Unit & get_unit() const = 0;
-
+    /// Return the unit of this parameter instance.
+    virtual const Unit& get_unit() const = 0;
+    /// Set the parameter to be fixed (or not).
     virtual void set_fixed(bool fixed) = 0;
+    /// Set the parameter to be free (or not).
     virtual void set_free(bool free) = 0;
+    /// Set the string label for this parameter instance.
     virtual void set_label(std::string label) = 0;
+    /// Set the limits for this parameter instance.
     virtual void set_limits(std::shared_ptr<const Limits<T>> limits) = 0;
+    /// Set the transforming function for this parameter instance.
     virtual void set_transform(const std::shared_ptr<const Transform<T>> transform) = 0;
+    /// Set the untransformed value for this parameter instance.
     virtual void set_value(T value) = 0;
+    /// Set the transformed value for this parameter instance.
     virtual void set_value_transformed(T value_transformed) = 0;
+    /// Set the unit for this parameter instance.
     virtual void set_unit(std::shared_ptr<const Unit> unit = nullptr) = 0;
-    virtual std::string str() const = 0;
 
-    friend bool operator == (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+    static const UnitTransform<T>& transform_none() { return UnitTransform<T>::get(); };
+
+    friend bool operator==(const ParameterBase<T>& first, const ParameterBase<T>& second) {
         return &first == &second;
     }
 
-    friend bool operator != (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+    friend bool operator!=(const ParameterBase<T>& first, const ParameterBase<T>& second) {
         return !(first == second);
     }
 
-    friend bool operator < (const ParameterBase<T> & first, const ParameterBase<T> & second) {
+    friend bool operator<(const ParameterBase<T>& first, const ParameterBase<T>& second) {
         return &first < &second;
     }
 
     virtual ~ParameterBase() = default;
 };
 
-template<typename T, class C>
+/**
+ * @brief A parameter with values and metadata.
+ *
+ * This is a CRTP implementation of the ParameterBase interface, which allows
+ * for concise, minimal-effort derived classes (see tests and examples).
+ *
+ * Notes
+ *
+ * CRTP performance benefits are likely lost by having an abstract base class
+ * with virtual methods; see ParameterBase Notes. The remaining benefits from
+ * CRTP are that derived classes can be implemented simply by defining
+ * static members. The implementation thereof in this class is somewhat ugly.
+ *
+ * @tparam T The type of the value. Only floating point values are tested.
+ * @tparam C The derived class.
+ */
+template <typename T, class C>
 class Parameter : public ParameterBase<T>, public std::enable_shared_from_this<C> {
 public:
     using SetC = std::set<std::shared_ptr<C>>;
 
 private:
-    // TODO: Remember why this class needs to exist, if it does
-    // Probably just to store the const Limits reference?
+    // These classes can store the default const Limits/Transform refs,
+    // in case the unique_ptr thereof is null.
+
+    /// A container for a const Limits ref
     struct Limiter {
-        const Limits<T> & limits;
-        Limiter(const Limits<T> & limits_in) : limits(limits_in) {};
+        const Limits<T>& limits;
+        Limiter(const Limits<T>& limits_in) : limits(limits_in){};
     };
 
+    /// A container for a const Transform ref
     struct Transformer {
-        const Transform<T> & transform;
-        Transformer(const Transform<T> & transform_in) : transform(transform_in) {};
+        const Transform<T>& transform;
+        Transformer(const Transform<T>& transform_in) : transform(transform_in){};
     };
 
     static constexpr T _default = 0;
@@ -117,16 +175,18 @@ private:
     std::shared_ptr<const Transform<T>> _transform_ptr;
     std::shared_ptr<const Unit> _unit_ptr;
 
-    void _set_value(T value)
-    {
-        if (!(get_limits().check(value))) throw std::runtime_error(
-            "Value=" + std::to_string(value) + " beyond get_limits()=" + get_limits().str()
-        );
+    // Set the untransformed value, checking limits
+    void _set_value(T value) {
+        if (!(get_limits().check(value)))
+            throw std::runtime_error("Value=" + std::to_string(value)
+                                     + " beyond get_limits()=" + get_limits().str());
         _value = value;
     }
 
 protected:
+    /// The untransformed value
     T _value;
+    /// The cached, transformed value
     T _value_transformed;
 
     static const std::string _get_desc() { return C::_desc; }
@@ -135,51 +195,67 @@ protected:
     static constexpr T _get_max() { return C::_max; }
     static const std::string _get_name() { return C::_name; }
 
-    static constexpr const Limits<T> _limits_maximal = Limits<T>(_get_min(), _get_max(),
-        type_name<C>(), ".limits_maximal");
-
 public:
+    /// Get the default value for the derived type of this
     static constexpr T _get_default() { return C::_default; }
-
+    /// Get a string description of this parameter class
     std::string get_desc() const override { return _get_desc(); }
+    /// Get the default value
     T get_default() const override { return _get_default(); }
+    /// Return whether the parameter is fixed (not free)
     bool get_fixed() const override { return !_free; }
+    /// Return whether the parameter is free (not fixed)
     bool get_free() const override { return _free; }
+    /// Get a string label for this parameter instance
     std::string get_label() const override { return _label; }
-    const Limits<T> & get_limits_maximal() const override { return _limits_maximal; }
-    const Limits<T> & get_limits() const override { return _limiter->limits; }
+    /// Get the maximal (widest possible) limits for the parameter value
+    const Limits<T>& get_limits_maximal() const override {
+        static const Limits<T> limits_maximal
+                = Limits<T>(_get_min(), _get_max(), std::string(type_name<C>()) + ".limits_maximal");
+        return limits_maximal;
+    }
+    /// Get the limits for this parameter
+    const Limits<T>& get_limits() const override { return _limiter->limits; }
+    /// Return whether this is a linear parameter of some model
     bool get_linear() const override { return _get_linear(); }
+    /// Get the minimum value of this parameter class
     T get_min() const override { return _get_min(); }
+    /// Get the maximum value of this parameter class
     T get_max() const override { return _get_max(); }
+    /// Get the common name of this parameter class
     std::string get_name() const override { return _get_name(); }
-    const Transform<T> & get_transform() const override { return _transformer->transform; }
+    /// Get the transform for this parameter instance
+    const Transform<T>& get_transform() const override { return _transformer->transform; }
+    /// Get the derivative of the transform at this parameter's current value
     T get_transform_derivative() const override {
         return this->get_transform().derivative(this->get_value());
     }
+    /// Get the name of the derived type of this
     static const std::string get_type_name() { return std::string(type_name<C>()); }
-    const Unit & get_unit() const override { return *_unit_ptr; }
+    /// Get the unit of this parameter instance
+    const Unit& get_unit() const override { return *_unit_ptr; }
+    //// Get the un-transformed value of this parameter instance
     T get_value() const override { return _value; }
+    //// Get the transformed value of this parameter instance
     T get_value_transformed() const override { return _value_transformed; }
 
+    /// Return a shared pointer to this
     std::shared_ptr<C> ptr() { return this->shared_from_this(); }
 
     void set_fixed(bool fixed) override { set_free(!fixed); }
-    void set_free(bool free) override {
-        _free = free;
-    }
+    void set_free(bool free) override { _free = free; }
     void set_label(std::string label) override { _label = std::move(label); }
     void set_limits(std::shared_ptr<const Limits<T>> limits) override {
         // TODO: Fix bad_alloc when calling this without &
-	// Disable copy constructor explicitly maybe?
-	const auto & limits_maximal = this->get_limits_maximal();
-        if (limits == nullptr) 
-        {
+        // Disable copy constructor explicitly maybe?
+        const auto& limits_maximal = this->get_limits_maximal();
+        if (limits == nullptr) {
             _limiter = std::make_unique<Limiter>(limits_maximal);
         } else {
             if (!((limits->get_min() >= this->get_min()) && (limits->get_max() <= this->get_max()))) {
                 std::string error = get_type_name() + ".set_limits(" + limits->str()
-                    + ") sets limits that are less restrictive than the minimum="
-                    + limits_maximal.str();
+                                    + ") sets limits that are less restrictive than the minimum="
+                                    + limits_maximal.str();
                 throw std::runtime_error(error);
             }
             _limits_ptr = std::move(limits);
@@ -187,12 +263,12 @@ public:
         }
     }
     void set_transform(const std::shared_ptr<const Transform<T>> transform) override {
-        if(transform == nullptr) {
+        if (transform == nullptr) {
             // TODO: determine why passing transform_none as arg here returns:
             // error: modification of '<temporary>' is not a constant expression
             // whereas get_transform_unit<T>() results in a segfault
             // (iff Transform has a virtual destructor)
-            _transformer = std::make_unique<Transformer>(transform_none);
+            _transformer = std::make_unique<Transformer>(this->transform_none());
         } else {
             _transform_ptr = std::move(transform);
             _transformer = std::make_unique<Transformer>(*_transform_ptr);
@@ -205,7 +281,7 @@ public:
         double value_new = this->get_value();
         _value_transformed = _transformer->transform.forward(value_new);
     };
-    
+
     void set_value_transformed(T value_transformed) override {
         _set_value(_transformer->transform.reverse(value_transformed));
         _value_transformed = _transformer->transform.forward(this->get_value());
@@ -215,21 +291,20 @@ public:
         _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
-    std::string str() const override {
-        return get_type_name() + "(" + std::to_string(_value) + ", " + get_limits().str() + ", "
-            + get_transform().str() + ", fixed=" + std::to_string(get_fixed()) + ")";
+    std::string repr(bool name_keywords = false) const override {
+        return get_type_name() + "(" + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
+               + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
+               + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
+               + (name_keywords ? "fixed=" : "") + std::to_string(get_fixed()) + ", "
+               + (name_keywords ? "label='" : "'") + _label + "')";
     }
 
-    static constexpr const UnitTransform<T> & transform_none = get_transform_unit<T>();
+    std::string str() const override { return get_type_name() + "(" + std::to_string(_value) + ")"; }
 
-    Parameter(
-        T value = _get_default(),
-        std::shared_ptr<const Limits<T>> limits = nullptr,
-        const std::shared_ptr<const Transform<T>> transform = nullptr,
-        std::shared_ptr<const Unit> unit = nullptr,
-        bool fixed = false,
-        std::string label = ""
-    ) : ParameterBase<T>() {
+    Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
+              const std::shared_ptr<const Transform<T>> transform = nullptr,
+              std::shared_ptr<const Unit> unit = nullptr, bool fixed = false, std::string label = "")
+            : ParameterBase<T>() {
         set_limits(limits);
         _value = value;
         set_transform(transform == nullptr ? nullptr : std::move(transform));
@@ -237,7 +312,7 @@ public:
         set_fixed(fixed);
         set_label(label);
     }
-    ~Parameter() {};
+    ~Parameter(){};
 };
-}
-#endif //PARAMETERS_PARAMETER_H
+}  // namespace parameters
+#endif  // PARAMETERS_PARAMETER_H

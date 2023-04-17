@@ -2,20 +2,21 @@
 // Created by dtaranu on 4/8/21.
 //
 
-#include <assert.h>
+#ifndef PARAMETERS_TRANSFORMS_H
+#define PARAMETERS_TRANSFORMS_H
+
 #include <cfloat>
-#include <iostream>
-
+#include <cmath>
 #include "parameter.h"
-#include "transforms.h"
-#include "type_name.h"
-#include "unit.h"
 
-namespace parameters {
-namespace {
+#ifndef PARAMETERS_TRANSFORM_H
+#include "transform.h"
+#endif
+
+using namespace parameters;
 
 static const std::string name_unit_none = "None";
-class UnitNone : public Unit {
+class UnitNone : public parameters::Unit {
 public:
     std::string get_name() const { return name_unit_none; }
 };
@@ -40,24 +41,4 @@ struct PositiveParameter : public Parameter<double, PositiveParameter> {
     using Parameter<double, PositiveParameter>::Parameter;
 };
 
-int _main()
-{
-    std::cout << "Testing standard parameters" << std::endl;
-    auto unit = std::make_shared<UnitNone>();
-    auto real = RealParameter();
-    real.set_unit(unit);
-    auto nonneg = NonNegativeParameter();
-    assert(nonneg.get_min() == 0);
-    std::cout << nonneg.str() << "," << nonneg.get_name() << "," << nonneg.get_desc() << ","
-        << nonneg.get_min() << std::endl;
-    auto pos = PositiveParameter();
-    std::cout << type_name<PositiveParameter>() << " == " << type_name_str<PositiveParameter>() << std::endl;
-
-    return EXIT_SUCCESS;
-}
-// TODO: Remove this once made part of a unit test
-static const int RESULT = _main();
-}
-}
-
-int main() { return RESULT; }
+#endif  // PARAMETERS_TRANSFORMS_H

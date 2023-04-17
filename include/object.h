@@ -21,17 +21,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_UNIT_H
-#define PARAMETERS_UNIT_H
+#ifndef PARAMETERS_OBJECT_H
+#define PARAMETERS_OBJECT_H
 
 #include <string>
 
 namespace parameters {
 
-class Unit {
+class Object {
 public:
-    virtual std::string get_name() const = 0;
-    virtual ~Unit() = default;
+    /// Return a full, callable string representation of this
+    virtual std::string repr(bool name_keywords = false) const = 0;
+    /// Return a brief string representation of this
+    virtual std::string str() const = 0;
+
+    friend std::ostream &operator<<(std::ostream &out, const Object &obj) {
+        out << obj.str();
+        return out;
+    }
+
+    virtual ~Object() = default;
 };
+
 }  // namespace parameters
-#endif  // PARAMETERS_PARAMETER_H
+#endif
