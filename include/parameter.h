@@ -178,7 +178,7 @@ private:
     // Set the untransformed value, checking limits
     void _set_value(T value) {
         if (!(get_limits().check(value)))
-            throw std::runtime_error("Value=" + std::to_string(value)
+            throw std::runtime_error(this->str() + "Value=" + std::to_string(value)
                                      + " beyond get_limits()=" + get_limits().str());
         _value = value;
     }
@@ -295,11 +295,22 @@ public:
         return get_type_name() + "(" + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
                + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
                + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
-               + (name_keywords ? "fixed=" : "") + std::to_string(get_fixed()) + ", "
+               + (name_keywords ? "fixed=" : "") + std::to_string(0 + get_fixed()) + ", "
                + (name_keywords ? "label='" : "'") + _label + "')";
     }
 
-    std::string str() const override { return get_type_name() + "(" + std::to_string(_value) + ")"; }
+    std::string str() const override {
+        return get_type_name() + "(value=" + std::to_string(_value)
+               + ", "
+               // TODO: Implement equality operators for limits/transforms
+               + ((&get_limits() == &get_limits_maximal()) ? "" : ("limits=" + get_limits().repr() + ", "))
+               + ((&get_transform() == &(this->transform_none()))
+                          ? ""
+                          : ("transform=" + get_transform().repr() + ", "))
+               + (!get_fixed() ? "" : (std::string("fixed=") + std::to_string(0 + get_fixed()) + ", "))
+               + ((get_label() == "") ? "" : ("label='" + get_label() + "'"))
+	           + ")";
+    }
 
     Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
               const std::shared_ptr<const Transform<T>> transform = nullptr,
