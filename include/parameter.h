@@ -83,6 +83,8 @@ public:
     virtual const Transform<T>& get_transform() const = 0;
     /// Return the derivative of the transform for this parameter instance.
     virtual T get_transform_derivative() const = 0;
+    /// Return the transform pointer for this parameter instance.
+    virtual std::shared_ptr<const Transform<T>> get_transform_ptr() const = 0;
     /// Return the untransformed value of this parameter instance.
     virtual T get_value() const = 0;
     /// Return the transformed value of this parameter instance.
@@ -226,6 +228,8 @@ public:
     std::string get_name() const override { return _get_name(); }
     /// Get the transform for this parameter instance
     const Transform<T>& get_transform() const override { return _transformer->transform; }
+    /// Get a pointer to the transform for this parameter instance
+    std::shared_ptr<const Transform<T>> get_transform_ptr() const override { return _transform_ptr; }
     /// Get the derivative of the transform at this parameter's current value
     T get_transform_derivative() const override {
         return this->get_transform().derivative(this->get_value());
