@@ -15,6 +15,8 @@ TEST_CASE("RealParameter") {
     CHECK(real.get_value() == 0);
     CHECK(real.repr().size() > 0);
     CHECK(real.str().size() > 0);
+
+    CHECK(real.get_transform_ptr() == transform);
 }
 
 TEST_CASE("NonNegativeParameter") {

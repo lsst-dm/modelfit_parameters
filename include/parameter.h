@@ -83,6 +83,8 @@ public:
     virtual const Transform<T>& get_transform() const = 0;
     /// Return the derivative of the transform for this parameter instance.
     virtual T get_transform_derivative() const = 0;
+    /// Return the transform pointer for this parameter instance.
+    virtual std::shared_ptr<const Transform<T>> get_transform_ptr() const = 0;
     /// Return the untransformed value of this parameter instance.
     virtual T get_value() const = 0;
     /// Return the transformed value of this parameter instance.
@@ -198,45 +200,47 @@ protected:
 public:
     /// Get the default value for the derived type of this
     static constexpr T _get_default() { return C::_default; }
-    /// Get a string description of this parameter class
+
     std::string get_desc() const override { return _get_desc(); }
-    /// Get the default value
+
     T get_default() const override { return _get_default(); }
-    /// Return whether the parameter is fixed (not free)
+
     bool get_fixed() const override { return !_free; }
-    /// Return whether the parameter is free (not fixed)
+
     bool get_free() const override { return _free; }
-    /// Get a string label for this parameter instance
+
     std::string get_label() const override { return _label; }
-    /// Get the maximal (widest possible) limits for the parameter value
+
     const Limits<T>& get_limits_maximal() const override {
         static const Limits<T> limits_maximal
                 = Limits<T>(_get_min(), _get_max(), std::string(type_name<C>()) + ".limits_maximal");
         return limits_maximal;
     }
-    /// Get the limits for this parameter
+
     const Limits<T>& get_limits() const override { return _limiter->limits; }
-    /// Return whether this is a linear parameter of some model
+
     bool get_linear() const override { return _get_linear(); }
-    /// Get the minimum value of this parameter class
+
     T get_min() const override { return _get_min(); }
-    /// Get the maximum value of this parameter class
+
     T get_max() const override { return _get_max(); }
-    /// Get the common name of this parameter class
+
     std::string get_name() const override { return _get_name(); }
-    /// Get the transform for this parameter instance
+
     const Transform<T>& get_transform() const override { return _transformer->transform; }
-    /// Get the derivative of the transform at this parameter's current value
+
+    std::shared_ptr<const Transform<T>> get_transform_ptr() const override { return _transform_ptr; }
+
     T get_transform_derivative() const override {
         return this->get_transform().derivative(this->get_value());
     }
     /// Get the name of the derived type of this
     static const std::string get_type_name() { return std::string(type_name<C>()); }
-    /// Get the unit of this parameter instance
+
     const Unit& get_unit() const override { return *_unit_ptr; }
-    //// Get the un-transformed value of this parameter instance
+
     T get_value() const override { return _value; }
-    //// Get the transformed value of this parameter instance
+
     T get_value_transformed() const override { return _value_transformed; }
 
     /// Return a shared pointer to this
