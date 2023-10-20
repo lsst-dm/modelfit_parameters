@@ -35,3 +35,9 @@ many IDEs expect a build directory in build/, as is typical with `cmake`.
 It may be convient to create a symbolic link between them, e.g.
 `ln -s build-release build`.
 
+To build with eups for use with the LSST pipelines, call:
+
+``setup -jr .``
+``eupspkg -e -v 1 config``
+``eupspkg -e -v 1 build``
+
