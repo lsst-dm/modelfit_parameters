@@ -21,17 +21,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_UNIT_H
-#define PARAMETERS_UNIT_H
+#ifndef MODELFIT_PARAMETERS_UNIT_H
+#define MODELFIT_PARAMETERS_UNIT_H
 
 #include <string>
 
-namespace parameters {
+namespace modelfit_parameters {
 
 class Unit {
 public:
     virtual std::string get_name() const = 0;
     virtual ~Unit() = default;
 };
-}  // namespace parameters
-#endif  // PARAMETERS_PARAMETER_H
+}  // namespace modelfit_parameters
+#endif  // MODELFIT_PARAMETERS_PARAMETER_H

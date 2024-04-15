@@ -21,12 +21,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_OBJECT_H
-#define PARAMETERS_OBJECT_H
+#ifndef MODELFIT_PARAMETERS_OBJECT_H
+#define MODELFIT_PARAMETERS_OBJECT_H
 
 #include <string>
 
-namespace parameters {
+namespace modelfit_parameters {
 
 class Object {
 public:
@@ -43,5 +43,5 @@ public:
     virtual ~Object() = default;
 };
 
-}  // namespace parameters
+}  // namespace modelfit_parameters
 #endif

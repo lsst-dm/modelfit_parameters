@@ -2,21 +2,21 @@
 // Created by dtaranu on 4/8/21.
 //
 
-#ifndef PARAMETERS_TRANSFORMS_H
-#define PARAMETERS_TRANSFORMS_H
+#ifndef MODELFIT_PARAMETERS_TRANSFORMS_H
+#define MODELFIT_PARAMETERS_TRANSFORMS_H
 
 #include <cfloat>
 #include <cmath>
 #include "parameter.h"
 
-#ifndef PARAMETERS_TRANSFORM_H
+#ifndef MODELFIT_PARAMETERS_TRANSFORM_H
 #include "transform.h"
 #endif
 
-using namespace parameters;
+using namespace modelfit_parameters;
 
 static const std::string name_unit_none = "None";
-class UnitNone : public parameters::Unit {
+class UnitNone : public modelfit_parameters::Unit {
 public:
     std::string get_name() const { return name_unit_none; }
 };
@@ -41,4 +41,4 @@ struct PositiveParameter : public Parameter<double, PositiveParameter> {
     using Parameter<double, PositiveParameter>::Parameter;
 };
 
-#endif  // PARAMETERS_TRANSFORMS_H
+#endif  // MODELFIT_PARAMETERS_TRANSFORMS_H

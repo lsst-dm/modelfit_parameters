@@ -21,8 +21,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_PARAMETER_H
-#define PARAMETERS_PARAMETER_H
+#ifndef MODELFIT_PARAMETERS_PARAMETER_H
+#define MODELFIT_PARAMETERS_PARAMETER_H
 
 #include <cmath>
 #include <iostream>
@@ -38,7 +38,7 @@
 #include "type_name.h"
 #include "unit.h"
 
-namespace parameters {
+namespace modelfit_parameters {
 
 /**
  * @brief Interface for parameters with values and metadata.
@@ -329,5 +329,5 @@ public:
     }
     ~Parameter(){};
 };
-}  // namespace parameters
-#endif  // PARAMETERS_PARAMETER_H
+}  // namespace modelfit_parameters
+#endif  // MODELFIT_PARAMETERS_PARAMETER_H

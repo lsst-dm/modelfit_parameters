@@ -21,8 +21,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_LIMITS_H
-#define PARAMETERS_LIMITS_H
+#ifndef MODELFIT_PARAMETERS_LIMITS_H
+#define MODELFIT_PARAMETERS_LIMITS_H
 
 #include <cctype>
 #include <limits>
@@ -33,7 +33,7 @@
 #include "transform.h"
 #include "type_name.h"
 
-namespace parameters {
+namespace modelfit_parameters {
 
 /**
  * @brief Limits for a given parameter value.
@@ -112,5 +112,5 @@ public:
     ~Limits(){};
 };
 
-}  // namespace parameters
-#endif  // PARAMETERS_LIMITS_H
+}  // namespace modelfit_parameters
+#endif  // MODELFIT_PARAMETERS_LIMITS_H

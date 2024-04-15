@@ -21,8 +21,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_TRANSFORM_H
-#define PARAMETERS_TRANSFORM_H
+#ifndef MODELFIT_PARAMETERS_TRANSFORM_H
+#define MODELFIT_PARAMETERS_TRANSFORM_H
 
 #include <cmath>
 #include <memory>
@@ -30,7 +30,7 @@
 
 #include "object.h"
 
-namespace parameters {
+namespace modelfit_parameters {
 
 /**
  * @brief A reversible transformation of a real scalar value.
@@ -75,5 +75,5 @@ public:
     ~UnitTransform() = default;
 };
 
-}  // namespace parameters
-#endif  // PARAMETERS_TRANSFORM_H
+}  // namespace modelfit_parameters
+#endif  // MODELFIT_PARAMETERS_TRANSFORM_H

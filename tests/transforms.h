@@ -2,16 +2,16 @@
 // Created by dtaranu on 4/8/21.
 //
 
-#ifndef PARAMETERS_TRANSFORMS_H
-#define PARAMETERS_TRANSFORMS_H
+#ifndef MODELFIT_PARAMETERS_TRANSFORMS_H
+#define MODELFIT_PARAMETERS_TRANSFORMS_H
 
 #include <cmath>
 
-#ifndef PARAMETERS_TRANSFORM_H
+#ifndef MODELFIT_PARAMETERS_TRANSFORM_H
 #include "transform.h"
 #endif
 
-using namespace parameters;
+using namespace modelfit_parameters;
 
 template <typename T>
 class LogTransform : public Transform<T> {
@@ -31,4 +31,4 @@ class Log10Transform : public Transform<T> {
     inline T reverse(T x) const { return pow10(x); }
 };
 
-#endif  // PARAMETERS_TRANSFORMS_H
+#endif  // MODELFIT_PARAMETERS_TRANSFORMS_H

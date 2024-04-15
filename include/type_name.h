@@ -21,13 +21,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_TYPE_NAME_H
-#define PARAMETERS_TYPE_NAME_H
+#ifndef MODELFIT_PARAMETERS_TYPE_NAME_H
+#define MODELFIT_PARAMETERS_TYPE_NAME_H
 
 #include <string>
 #include <string_view>
 
-namespace parameters {
+namespace modelfit_parameters {
 
 // https://stackoverflow.com/questions/81870/is-it-possible-to-print-a-variables-type-in-standard-c/64490578#64490578
 template <typename T>
@@ -80,5 +80,5 @@ const std::string type_name_str() {
     return std::string(type_name<T>());
 }
 
-}  // namespace parameters
+}  // namespace modelfit_parameters
 #endif
