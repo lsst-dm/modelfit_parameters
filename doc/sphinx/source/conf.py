@@ -6,8 +6,8 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'parameters'
-copyright = '2018-2023, The Trustees of Princeton University'
+project = 'modelfit_parameters'
+copyright = '2018-2024, The Trustees of Princeton University'
 author = 'Dan Taranu'
 
 # -- General configuration ---------------------------------------------------
@@ -30,4 +30,4 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 # -- Breathe configuration ---------------------------------------------------
-breathe_default_project = "parameters"
+breathe_default_project = "modelfit_parameters"
