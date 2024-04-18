@@ -100,7 +100,7 @@ public:
     /// Set the limits for this parameter instance.
     virtual void set_limits(std::shared_ptr<const Limits<T>> limits) = 0;
     /// Set the transforming function for this parameter instance.
-    virtual void set_transform(const std::shared_ptr<const Transform<T>> transform) = 0;
+    virtual void set_transform(std::shared_ptr<const Transform<T>> transform) = 0;
     /// Set the untransformed value for this parameter instance.
     virtual void set_value(T value) = 0;
     /// Set the transformed value for this parameter instance.
@@ -115,7 +115,7 @@ public:
     }
 
     friend bool operator!=(const ParameterBase<T>& first, const ParameterBase<T>& second) {
-        return !(first == second);
+        return &first != &second;
     }
 
     friend bool operator<(const ParameterBase<T>& first, const ParameterBase<T>& second) {
@@ -143,9 +143,6 @@ public:
  */
 template <typename T, class C>
 class Parameter : public ParameterBase<T>, public std::enable_shared_from_this<C> {
-public:
-    using SetC = std::set<std::shared_ptr<C>>;
-
 private:
     // These classes can store the default const Limits/Transform refs,
     // in case the unique_ptr thereof is null.
