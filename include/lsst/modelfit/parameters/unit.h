@@ -22,31 +22,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LSST_MODELFIT_PARAMETERS_TRANSFORMS_H
-#define LSST_MODELFIT_PARAMETERS_TRANSFORMS_H
+#ifndef LSST_MODELFIT_PARAMETERS_UNIT_H
+#define LSST_MODELFIT_PARAMETERS_UNIT_H
 
-#include <cmath>
-#include "lsst/modelfit/parameters/transform.h"
+#include <string>
 
 namespace lsst::modelfit::parameters {
 
-template <typename T>
-class LogTransform : public Transform<T> {
-    std::string description() const { return "Natural (base e) logarithmic transform"; }
-    std::string str() const { return "LogTransform"; }
-
-    inline T forward(T x) const { return log(x); }
-    inline T reverse(T x) const { return exp(x); }
+class Unit {
+public:
+    virtual std::string get_name() const = 0;
+    virtual ~Unit() = default;
 };
-
-template <typename T>
-class Log10Transform : public Transform<T> {
-    std::string description() const { return "Base 10 logarithmic transform"; }
-    std::string str() const { return "Log10Transform"; }
-
-    inline T forward(T x) const { return log10(x); }
-    inline T reverse(T x) const { return pow10(x); }
-};
-}
-
-#endif  // LSST_MODELFIT_PARAMETERS_TRANSFORMS_H
+}  // namespace lsst::modelfit::parameters
+#endif  // LSST_MODELFIT_PARAMETERS_PARAMETER_H

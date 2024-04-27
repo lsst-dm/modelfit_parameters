@@ -1,3 +1,4 @@
+// -*- LSST-C++ -*-
 /*
  * This file is part of parameters.
  *
@@ -21,27 +22,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MODELFIT_PARAMETERS_OBJECT_H
-#define MODELFIT_PARAMETERS_OBJECT_H
+#ifndef LSST_MODELFIT_PARAMETERS_H
+#define LSST_MODELFIT_PARAMETERS_H
 
-#include <string>
+#include "parameters/limits.h"
+#include "parameters/object.h"
+#include "parameters/parameter.h"
+#include "parameters/transform.h"
+#include "parameters/type_name.h"
+#include "parameters/unit.h"
 
-namespace modelfit_parameters {
-
-class Object {
-public:
-    /// Return a full, callable string representation of this
-    virtual std::string repr(bool name_keywords = false) const = 0;
-    /// Return a brief string representation of this
-    virtual std::string str() const = 0;
-
-    friend std::ostream &operator<<(std::ostream &out, const Object &obj) {
-        out << obj.str();
-        return out;
-    }
-
-    virtual ~Object() = default;
-};
-
-}  // namespace modelfit_parameters
-#endif
+#endif  // LSST_MODELFIT_PARAMETERS_H

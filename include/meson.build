@@ -1,4 +1,16 @@
+modelfit = 'lsst/modelfit/'
+parameters = modelfit + 'parameters/'
+headers = [
+    modelfit + 'parameters.h',
+    parameters + 'limits.h',
+    parameters + 'object.h',
+    parameters + 'parameter.h',
+    parameters + 'transform.h',
+    parameters + 'type_name.h',
+    parameters + 'unit.h',
+]
+
 install_headers(
-    ['limits.h', 'object.h', 'parameter.h', 'transform.h', 'type_name.h', 'unit.h'],
-    subdir : meson.project_name()
+    headers,
+    preserve_path : true,
 )

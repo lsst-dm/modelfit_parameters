@@ -1,15 +1,11 @@
 project(
-  'modelfit_parameters',
+  'lsst_modelfit_parameters',
   'cpp',
   version : '0.1.0',
   license : 'GPL-3.0-or-later',
   default_options : ['warning_level=3']
 )
 project_description = 'Define parameters with limits and transforms for model fitting'
-
-project_test_files = [
-    'tests/parameter.cc',
-]
 
 # Target
 public_headers = include_directories('include')

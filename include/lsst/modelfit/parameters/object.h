@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,17 +22,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MODELFIT_PARAMETERS_UNIT_H
-#define MODELFIT_PARAMETERS_UNIT_H
+#ifndef LSST_MODELFIT_PARAMETERS_OBJECT_H
+#define LSST_MODELFIT_PARAMETERS_OBJECT_H
 
 #include <string>
 
-namespace modelfit_parameters {
+namespace lsst::modelfit::parameters {
 
-class Unit {
+class Object {
 public:
-    virtual std::string get_name() const = 0;
-    virtual ~Unit() = default;
+    /// Return a full, callable string representation of this
+    virtual std::string repr(bool name_keywords = false) const = 0;
+    /// Return a brief string representation of this
+    virtual std::string str() const = 0;
+
+    friend std::ostream &operator<<(std::ostream &out, const Object &obj) {
+        out << obj.str();
+        return out;
+    }
+
+    virtual ~Object() = default;
 };
-}  // namespace modelfit_parameters
-#endif  // MODELFIT_PARAMETERS_PARAMETER_H
+
+}  // namespace lsst::modelfit::parameters
+#endif

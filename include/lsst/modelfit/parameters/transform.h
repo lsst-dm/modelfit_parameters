@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,8 +22,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MODELFIT_PARAMETERS_TRANSFORM_H
-#define MODELFIT_PARAMETERS_TRANSFORM_H
+#ifndef LSST_MODELFIT_PARAMETERS_TRANSFORM_H
+#define LSST_MODELFIT_PARAMETERS_TRANSFORM_H
 
 #include <cmath>
 #include <memory>
@@ -30,7 +31,7 @@
 
 #include "object.h"
 
-namespace modelfit_parameters {
+namespace lsst::modelfit::parameters {
 
 /**
  * @brief A reversible transformation of a real scalar value.
@@ -75,5 +76,5 @@ public:
     ~UnitTransform() = default;
 };
 
-}  // namespace modelfit_parameters
-#endif  // MODELFIT_PARAMETERS_TRANSFORM_H
+}  // namespace lsst::modelfit::parameters
+#endif  // LSST_MODELFIT_PARAMETERS_TRANSFORM_H

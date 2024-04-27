@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,13 +22,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MODELFIT_PARAMETERS_TYPE_NAME_H
-#define MODELFIT_PARAMETERS_TYPE_NAME_H
+#ifndef LSST_MODELFIT_PARAMETERS_TYPE_NAME_H
+#define LSST_MODELFIT_PARAMETERS_TYPE_NAME_H
 
 #include <string>
 #include <string_view>
 
-namespace modelfit_parameters {
+namespace lsst::modelfit::parameters {
 
 // https://stackoverflow.com/questions/81870/is-it-possible-to-print-a-variables-type-in-standard-c/64490578#64490578
 template <typename T>
@@ -80,5 +81,5 @@ const std::string type_name_str() {
     return std::string(type_name<T>());
 }
 
-}  // namespace modelfit_parameters
+}  // namespace lsst::modelfit::parameters
 #endif

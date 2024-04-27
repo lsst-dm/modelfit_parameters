@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,8 +22,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MODELFIT_PARAMETERS_PARAMETER_H
-#define MODELFIT_PARAMETERS_PARAMETER_H
+#ifndef LSST_MODELFIT_PARAMETERS_PARAMETER_H
+#define LSST_MODELFIT_PARAMETERS_PARAMETER_H
 
 #include <cmath>
 #include <iostream>
@@ -38,7 +39,7 @@
 #include "type_name.h"
 #include "unit.h"
 
-namespace modelfit_parameters {
+namespace lsst::modelfit::parameters {
 
 /**
  * @brief Interface for parameters with values and metadata.
@@ -309,8 +310,7 @@ public:
                           ? ""
                           : ("transform=" + get_transform().repr() + ", "))
                + (!get_fixed() ? "" : (std::string("fixed=") + std::to_string(0 + get_fixed()) + ", "))
-               + ((get_label() == "") ? "" : ("label='" + get_label() + "'"))
-	           + ")";
+               + ((get_label() == "") ? "" : ("label='" + get_label() + "'")) + ")";
     }
 
     Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
@@ -326,5 +326,5 @@ public:
     }
     ~Parameter(){};
 };
-}  // namespace modelfit_parameters
-#endif  // MODELFIT_PARAMETERS_PARAMETER_H
+}  // namespace lsst::modelfit::parameters
+#endif  // LSST_MODELFIT_PARAMETERS_PARAMETER_H
