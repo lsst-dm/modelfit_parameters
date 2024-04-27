@@ -38,5 +38,19 @@ endif
 # Unit Tests
 subdir('tests')
 
-# Build docs
+# Build docs (optional)
 subdir('doc')
+
+pymod = import('python')
+python = pymod.find_installation(
+    'python3',
+    required : false,
+    modules: ['lsst.sconsUtils'],
+)
+has_py3 = python.found()
+scons = find_program('scons', required: false)
+has_scons = scons.found()
+if has_scons and has_py3
+    message('Running SCons to build docs; see ' + meson.build_root() + '/meson-logs/meson-log.txt for output')
+    run_command('sh', '-c', 'cd $MESON_SOURCE_ROOT && echo $PWD && scons', check: false, capture: true)
+endif

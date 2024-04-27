@@ -1,5 +1,5 @@
-Modelfit: Parameters
-####################
+Modelfit Parameters
+###################
 
 *modelfit_parameters* is a library for defining parameters used in fitting
 parametric models. It is being developed primarily for use in astronomy -
