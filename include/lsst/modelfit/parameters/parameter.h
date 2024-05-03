@@ -119,7 +119,7 @@ public:
     }
 
     friend bool operator<(const ParameterBase<T>& first, const ParameterBase<T>& second) {
-        return &first < &second;
+        return std::less<const ParameterBase<T>*>{}(&first, &second) == true;
     }
 
     virtual ~ParameterBase() = default;
