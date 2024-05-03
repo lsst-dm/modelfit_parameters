@@ -33,6 +33,9 @@ namespace lsst::modelfit::parameters {
 
 static const std::string name_unit_none = "None";
 
+/**
+ * A bare-minimum implementation of a Unit with no name.
+ */
 class UnitNone : public Unit {
 public:
     std::string get_name() const override { return name_unit_none; }
@@ -53,7 +56,7 @@ struct NonNegativeParameter : public Parameter<double, NonNegativeParameter> {
 
 struct PositiveParameter : public Parameter<double, PositiveParameter> {
     static inline constexpr double _min = DBL_TRUE_MIN;
-    static inline const std::string _desc = "Non-negative, potentially infinite parameter";
+    static inline const std::string _desc = "Non-negative, non-zero, potentially infinite parameter";
     static inline const std::string _name = "positive";
     using Parameter<double, PositiveParameter>::Parameter;
 };
