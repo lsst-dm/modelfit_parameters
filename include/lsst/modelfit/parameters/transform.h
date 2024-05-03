@@ -69,9 +69,9 @@ public:
     }
     std::string str() const override { return "UnitTransform()"; }
 
-    inline T derivative(T) const { return 1; }
-    inline T forward(T x) const { return x; }
-    inline T reverse(T x) const { return x; }
+    inline T derivative(T) const override { return 1; }
+    inline T forward(T x) const override { return x; }
+    inline T reverse(T x) const override { return x; }
 
     ~UnitTransform() = default;
 };

@@ -35,7 +35,7 @@ static const std::string name_unit_none = "None";
 
 class UnitNone : public Unit {
 public:
-    std::string get_name() const { return name_unit_none; }
+    std::string get_name() const override { return name_unit_none; }
 };
 
 struct RealParameter : public Parameter<double, RealParameter> {
