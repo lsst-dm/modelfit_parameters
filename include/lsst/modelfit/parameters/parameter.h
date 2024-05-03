@@ -134,6 +134,10 @@ public:
  * @tparam T The type of the value. Only floating point values are tested.
  * @tparam C The derived class.
  *
+ * @note Parameters can be set as free/fixed when they are part of a model.
+ * This designation is indicative and does not prevent the parameter value
+ * from being changed by users.
+ *
  * @note CRTP performance benefits are likely lost by having an abstract base
  * class with virtual methods; see ParameterBase Notes. This may be obviated
  * by future compiler improvements.
@@ -160,22 +164,30 @@ private:
         Transformer(const Transform<T>& transform_in) : transform(transform_in){};
     };
 
+    /// The default value for this type of Parameter
     static constexpr T _default = 0;
+    /// The minimum valid value (inclusive) for this type of Parameter
     static constexpr T _min = -std::numeric_limits<T>::infinity();
+    /// The maximum valid value (inclusive) for this type of Parameter
     static constexpr T _max = std::numeric_limits<T>::infinity();
+    /// Whether this Parameter is a linear parameter in a model
     static constexpr bool _linear = false;
-
+    /// Whether this Parameter is a free parameter in a model
     bool _free = true;
+    /// A Limiter to further restrict this parameter's values
     std::unique_ptr<Limiter> _limiter;
+    /// A Transformer to remap this parameter's value
     std::unique_ptr<Transformer> _transformer;
-
+    /// A descriptive label for this parameter
     std::string _label;
-
+    /// The Limits for this parameter, if not default
     std::shared_ptr<const Limits<T>> _limits_ptr;
+    /// The Transform for this parameter, if not default
     std::shared_ptr<const Transform<T>> _transform_ptr;
+    /// The Unit for this parameter's untransformed value
     std::shared_ptr<const Unit> _unit_ptr;
 
-    // Set the untransformed value, checking limits
+    /// Set the untransformed value, checking limits
     void _set_value(T value) {
         if (!(get_limits().check(value)))
             throw std::runtime_error(this->str() + "Value=" + std::to_string(value)
@@ -313,6 +325,16 @@ public:
                + ((get_label() == "") ? "" : ("label='" + get_label() + "'")) + ")";
     }
 
+    /**
+     * Initialize a Parameter.
+     *
+     * @param value The initial untransformed value.
+     * @param limits The untransformed value limits.
+     * @param transform The transformation to apply to values.
+     * @param unit The unit of the untransformed value.
+     * @param fixed Whether the parameter is fixed in models.
+     * @param label A descriptive label for the parameter.
+     */
     Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
               const std::shared_ptr<const Transform<T>> transform = nullptr,
               std::shared_ptr<const Unit> unit = nullptr, bool fixed = false, std::string label = "")

@@ -29,8 +29,12 @@
 
 namespace lsst::modelfit::parameters {
 
+/**
+ * A generic interface for physical units described by strings.
+ */
 class Unit {
 public:
+    /// Return a string representation of this unit
     virtual std::string get_name() const = 0;
     virtual ~Unit() = default;
 };

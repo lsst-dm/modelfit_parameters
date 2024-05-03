@@ -37,7 +37,7 @@
 namespace lsst::modelfit::parameters {
 
 /**
- * @brief Limits for a given parameter value.
+ * Range-based limits for parameter values.
  *
  * @tparam T The type of the value. Only floating point values are tested.
  */
@@ -50,16 +50,16 @@ private:
     constexpr void _check(const T& min, const T& max) const {
         if (std::isnan(min) || std::isnan(max))
             throw std::runtime_error(str() + " can't be initialized with NaN limits");
-        if (!(min <= max)) throw std::runtime_error(str() + " can't be initialized with !(min <= max)");
+        if (!(min <= max)) throw std::invalid_argument(str() + " can't be initialized with !(min <= max)");
     }
 
     inline void _check_min(const T& min) const {
-        if (std::isnan(min)) throw std::runtime_error(str() + " set_min given NaN");
-        if (!(min <= _max)) throw std::runtime_error(str() + " set_min !(min_new <= max)");
+        if (std::isnan(min)) throw std::invalid_argument(str() + " set_min given NaN");
+        if (!(min <= _max)) throw std::invalid_argument(str() + " set_min !(min_new <= max)");
     }
     inline void _check_max(const T& max) const {
-        if (std::isnan(max)) throw std::runtime_error(str() + " set_max given NaN");
-        if (!(max >= _min)) throw std::runtime_error(str() + " set_max !(min <= max_new)");
+        if (std::isnan(max)) throw std::invalid_argument(str() + " set_max given NaN");
+        if (!(max >= _min)) throw std::invalid_argument(str() + " set_max !(min <= max_new)");
     }
 
 public:
@@ -104,6 +104,7 @@ public:
         return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + name + "')";
     }
 
+    /// Initialize limits from the minimum and maximum value.
     Limits(T min = -std::numeric_limits<T>::infinity(), T max = std::numeric_limits<T>::infinity(),
            std::string name_ = "")
             : _min(min), _max(max), name(name_) {
