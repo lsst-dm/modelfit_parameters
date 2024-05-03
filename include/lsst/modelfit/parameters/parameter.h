@@ -48,12 +48,11 @@ namespace lsst::modelfit::parameters {
  * description, unit, as well as optional limits and a transforming function.
  * This class is intended for use in numerical optimization.
  *
- * Notes
- *
- * This base class exists partly because e.g. Python bindings can't understand
- * CRTP. It is probably unnecessary in C++ and comes with a performance hit.
- *
  * @tparam T The type of the value. Only floating point values are tested.
+ *
+ * @note This base class exists partly because e.g. Python bindings can't
+ * understand CRTP. It is probably unnecessary (albeit convenient) in C++
+ * and comes with a performance cost.
  */
 template <typename T>
 class ParameterBase : public Object {
@@ -132,15 +131,16 @@ public:
  * This is a CRTP implementation of the ParameterBase interface, which allows
  * for concise, minimal-effort derived classes (see tests and examples).
  *
- * Notes
- *
- * CRTP performance benefits are likely lost by having an abstract base class
- * with virtual methods; see ParameterBase Notes. The remaining benefits from
- * CRTP are that derived classes can be implemented simply by defining
- * static members. The implementation thereof in this class is somewhat ugly.
- *
  * @tparam T The type of the value. Only floating point values are tested.
  * @tparam C The derived class.
+ *
+ * @note CRTP performance benefits are likely lost by having an abstract base
+ * class with virtual methods; see ParameterBase Notes. This may be obviated
+ * by future compiler improvements.
+ *
+ * @note The main benefit of CRTP left is that derived classes can be
+ * implemented just by defining static members. The implementation thereof in
+ * this class is not trivial, however.
  */
 template <typename T, class C>
 class Parameter : public ParameterBase<T>, public std::enable_shared_from_this<C> {
