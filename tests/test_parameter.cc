@@ -42,6 +42,13 @@ TEST_CASE("RealParameter") {
     CHECK(real.str().size() > 0);
 
     CHECK(real.get_transform_ptr() == transform);
+
+    auto real2 = mod_params::RealParameter(0, nullptr, transform);
+    CHECK(real != real2);
+    CHECK(!(real == real2));
+    CHECK(!(real < real2));
+    // I don't think this has to be true or false; it should just not except
+    real < real2;
 }
 
 TEST_CASE("NonNegativeParameter") {
@@ -49,4 +56,6 @@ TEST_CASE("NonNegativeParameter") {
     CHECK(nonneg.get_min() == 0);
 }
 
-TEST_CASE("NonNegativeParameter") { auto pos = mod_params::PositiveParameter(); }
+TEST_CASE("NonNegativeParameter") {
+    auto pos = mod_params::PositiveParameter();
+}
