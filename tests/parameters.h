@@ -22,8 +22,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LSST_MODELFIT_PARAMETERS_H
-#define LSST_MODELFIT_PARAMETERS_H
+#ifndef LSST_MODELFIT_PARAMETERS_TESTS_PARAMETERS_H
+#define LSST_MODELFIT_PARAMETERS_TESTS_PARAMETERS_H
 
 #include <cfloat>
 #include <cmath>
@@ -59,4 +59,4 @@ struct PositiveParameter : public Parameter<double, PositiveParameter> {
 };
 }
 
-#endif  // LSST_MODELFIT_PARAMETERS_H
+#endif  // LSST_MODELFIT_PARAMETERS_TESTS_PARAMETERS_H

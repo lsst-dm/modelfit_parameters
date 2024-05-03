@@ -22,8 +22,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LSST_MODELFIT_PARAMETERS_TRANSFORMS_H
-#define LSST_MODELFIT_PARAMETERS_TRANSFORMS_H
+#ifndef LSST_MODELFIT_PARAMETERS_TESTS_TRANSFORMS_H
+#define LSST_MODELFIT_PARAMETERS_TESTS_TRANSFORMS_H
 
 #include <cmath>
 #include "lsst/modelfit/parameters/transform.h"
@@ -49,4 +49,4 @@ class Log10Transform : public Transform<T> {
 };
 }
 
-#endif  // LSST_MODELFIT_PARAMETERS_TRANSFORMS_H
+#endif  // LSST_MODELFIT_PARAMETERS_TESTS_TRANSFORMS_H
