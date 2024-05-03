@@ -35,4 +35,4 @@ public:
     virtual ~Unit() = default;
 };
 }  // namespace lsst::modelfit::parameters
-#endif  // LSST_MODELFIT_PARAMETERS_PARAMETER_H
+#endif  // LSST_MODELFIT_PARAMETERS_UNIT_H
