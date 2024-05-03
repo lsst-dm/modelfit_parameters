@@ -36,26 +36,23 @@ TEST_CASE("RealParameter") {
 
     auto real = mod_params::RealParameter(0, nullptr, transform);
     real.set_unit(unit);
-    CHECK(real.get_unit().get_name() == unit->get_name());
-    CHECK(real.get_value() == 0);
-    CHECK(real.repr().size() > 0);
-    CHECK(real.str().size() > 0);
+    CHECK_EQ(real.get_unit().get_name(), unit->get_name());
+    CHECK_EQ(real.get_value(), 0);
+    CHECK_GT(real.repr().size(), 0);
+    CHECK_GT(real.str().size(), 0);
 
-    CHECK(real.get_transform_ptr() == transform);
+    CHECK_EQ(real.get_transform_ptr(), transform);
 
     auto real2 = mod_params::RealParameter(0, nullptr, transform);
-    CHECK(real != real2);
-    CHECK(!(real == real2));
-    CHECK(!(real < real2));
-    // I don't think this has to be true or false; it should just not except
-    real < real2;
+    CHECK_NE(real, real2);
+    CHECK_EQ(real == real2, false);
+    // CHECK_NOTHROW unfortunately gives an unused result compiler warning
+    CHECK_EQ((real < real2) | true, true);
 }
 
 TEST_CASE("NonNegativeParameter") {
     auto nonneg = mod_params::NonNegativeParameter();
-    CHECK(nonneg.get_min() == 0);
+    CHECK_EQ(nonneg.get_min(), 0);
 }
 
-TEST_CASE("NonNegativeParameter") {
-    auto pos = mod_params::PositiveParameter();
-}
+TEST_CASE("NonNegativeParameter") { auto pos = mod_params::PositiveParameter(); }
