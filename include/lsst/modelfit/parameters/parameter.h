@@ -245,7 +245,11 @@ public:
         return this->get_transform().derivative(this->get_value());
     }
     /// Get the name of the derived type of this
-    static const std::string get_type_name() { return std::string(type_name<C>()); }
+    static const std::string get_type_name(bool strip_namespace_separator = false,
+                                           const std::string_view& namespace_separator
+                                           = detail::NAMESPACE_SEPARATOR) {
+        return type_name_str<C>(strip_namespace_separator, namespace_separator);
+    }
 
     const Unit& get_unit() const override { return *_unit_ptr; }
 
@@ -305,16 +309,17 @@ public:
         _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
-    std::string repr(bool name_keywords = false) const override {
-        return get_type_name() + "(" + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
-               + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
+    std::string repr(bool name_keywords = false, const std::string_view& namespace_separator
+                                                 = Object::CC_NAMESPACE_SEPARATOR) const override {
+        return get_type_name(false, namespace_separator) + "(" + (name_keywords ? "value=" : "")
+               + std::to_string(_value) + ", " + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
                + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
                + (name_keywords ? "fixed=" : "") + std::to_string(0 + get_fixed()) + ", "
                + (name_keywords ? "label='" : "'") + _label + "')";
     }
 
     std::string str() const override {
-        return get_type_name() + "(value=" + std::to_string(_value)
+        return get_type_name(true) + "(value=" + std::to_string(_value)
                + ", "
                // TODO: Implement equality operators for limits/transforms
                + ((&get_limits() == &get_limits_maximal()) ? "" : ("limits=" + get_limits().repr() + ", "))

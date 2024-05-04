@@ -38,6 +38,9 @@ namespace lsst::modelfit::parameters {
  */
 class Object {
 public:
+    /// The C++ namespace separator
+    static constexpr std::string_view CC_NAMESPACE_SEPARATOR = "::";
+
     /**
      * Return a full, callable string representation of this.
      *
@@ -54,7 +57,8 @@ public:
      * in C++. The representation with name_keywords=true should be callable
      * in Python, if there are any bindings.
      */
-    virtual std::string repr(bool name_keywords = false) const = 0;
+    virtual std::string repr(bool name_keywords = false,
+                             const std::string_view &namespace_separator = CC_NAMESPACE_SEPARATOR) const = 0;
     /// Return a brief, human-readable string representation of this.
     virtual std::string str() const = 0;
 

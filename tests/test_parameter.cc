@@ -48,6 +48,10 @@ TEST_CASE("RealParameter") {
     CHECK_EQ(real == real2, false);
     // CHECK_NOTHROW unfortunately gives an unused result compiler warning
     CHECK_EQ((real < real2) | true, true);
+    auto real_repr = real.repr();
+    auto real_str = real.str();
+    CHECK_EQ(real_repr.substr(0, 41), "lsst::modelfit::parameters::RealParameter");
+    CHECK_EQ(real_str.substr(0, 13), "RealParameter");
 }
 
 TEST_CASE("NonNegativeParameter") {
@@ -55,4 +59,4 @@ TEST_CASE("NonNegativeParameter") {
     CHECK_EQ(nonneg.get_min(), 0);
 }
 
-TEST_CASE("NonNegativeParameter") { auto pos = mod_params::PositiveParameter(); }
+TEST_CASE("PositiveParameter") { auto pos = mod_params::PositiveParameter(); }

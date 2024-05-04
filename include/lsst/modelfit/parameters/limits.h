@@ -92,16 +92,15 @@ public:
         _max = max;
     };
 
-    std::string repr(bool name_keywords = false) const override {
-        return "Limits"
-               + (name_keywords ? std::to_string(std::toupper(std::string(type_name<T>())[0]))
-                                : "<" + std::string(type_name<T>()) + ">")
-               + "(" + (name_keywords ? "min=" : "") + std::to_string(_min) + ", "
-               + (name_keywords ? "max=" : "") + std::to_string(_max) + ", " + (name_keywords ? "name='" : "")
-               + name + "')";
+    std::string repr(bool name_keywords = false,
+                     const std::string_view& namespace_separator = CC_NAMESPACE_SEPARATOR) const override {
+        return type_name_str<Limits<T>>(false, namespace_separator) + "(" + (name_keywords ? "min=" : "")
+               + std::to_string(_min) + ", " + (name_keywords ? "max=" : "") + std::to_string(_max) + ", "
+               + (name_keywords ? "name='" : "") + name + "')";
     }
     std::string str() const override {
-        return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + name + "')";
+        return type_name_str<Limits<T>>(true) + "(" + std::to_string(_min) + ", " + std::to_string(_max)
+               + ", '" + name + "')";
     }
 
     /// Initialize limits from the minimum and maximum value.

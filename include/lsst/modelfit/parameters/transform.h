@@ -30,6 +30,7 @@
 #include <string>
 
 #include "object.h"
+#include "type_name.h"
 
 namespace lsst::modelfit::parameters {
 
@@ -64,10 +65,11 @@ public:
         static const auto transform = UnitTransform<T>();
         return transform;
     }
-    std::string repr(__attribute__((unused)) bool name_keywords = false) const override {
-        return "UnitTransform()";
+    std::string repr(bool = false, const std::string_view& namespace_separator
+                                   = Object::CC_NAMESPACE_SEPARATOR) const override {
+        return type_name_str<UnitTransform<T>>(false, namespace_separator) + "()";
     }
-    std::string str() const override { return "UnitTransform()"; }
+    std::string str() const override { return type_name_str<UnitTransform<T>>(true) + "()"; }
 
     inline T derivative(T) const override { return 1; }
     inline T forward(T x) const override { return x; }
