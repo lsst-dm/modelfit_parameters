@@ -32,18 +32,36 @@ namespace lsst::modelfit::parameters {
 
 template <typename T>
 class LogTransform : public Transform<T> {
+public:
     std::string description() const { return "Natural (base e) logarithmic transform"; }
-    std::string str() const { return "LogTransform"; }
+    std::string repr([[maybe_unused]] bool name_keywords = false,
+                     const std::string_view& namespace_separator = Object::CC_NAMESPACE_SEPARATOR
+                     ) const override {
+        return type_name_str<LogTransform>(false, namespace_separator) + "()";
+    }
+    std::string str() const override {
+        return type_name_str<LogTransform>(true) + "()";
+    }
 
+    inline T derivative(T x) const { return 1./x; }
     inline T forward(T x) const { return log(x); }
     inline T reverse(T x) const { return exp(x); }
 };
 
 template <typename T>
 class Log10Transform : public Transform<T> {
-    std::string description() const { return "Base 10 logarithmic transform"; }
-    std::string str() const { return "Log10Transform"; }
+public:
+    std::string description() const override { return "Base 10 logarithmic transform"; }
+    std::string repr([[maybe_unused]] bool name_keywords = false,
+                     const std::string_view& namespace_separator = Object::CC_NAMESPACE_SEPARATOR
+                     ) const override {
+        return type_name_str<Log10Transform>(false, namespace_separator) + "()";
+    }
+    std::string str() const override {
+        return type_name_str<Log10Transform>(true) + "()";
+    }
 
+    inline T derivative(T x) const { return 1./x; }
     inline T forward(T x) const { return log10(x); }
     inline T reverse(T x) const { return pow10(x); }
 };

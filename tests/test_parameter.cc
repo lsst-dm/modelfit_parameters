@@ -26,7 +26,6 @@
 #include "doctest.h"
 
 #include "parameters.h"
-#include "transforms.h"
 
 namespace mod_params = lsst::modelfit::parameters;
 
@@ -59,4 +58,7 @@ TEST_CASE("NonNegativeParameter") {
     CHECK_EQ(nonneg.get_min(), 0);
 }
 
-TEST_CASE("PositiveParameter") { auto pos = mod_params::PositiveParameter(); }
+TEST_CASE("PositiveParameter") {
+    auto pos = mod_params::PositiveParameter();
+    CHECK_EQ(pos.get_min(), DBL_TRUE_MIN);
+}

@@ -27,6 +27,7 @@
 
 #include <cfloat>
 #include <cmath>
+
 #include "lsst/modelfit/parameters/parameter.h"
 
 namespace lsst::modelfit::parameters {

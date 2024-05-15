@@ -1,6 +1,7 @@
 test_names = [
     'limits',
     'parameter',
+    'transform',
 ]
 foreach test_name : test_names
     test = executable(
