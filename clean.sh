@@ -1,5 +1,6 @@
-# Delete the build directory
+# Delete the build directories
 rm -rf build-release
+rm -rf build-debug
 # Clean the docs
 if command -v package-docs &> /dev/null
 then

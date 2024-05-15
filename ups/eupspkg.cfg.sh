@@ -2,7 +2,7 @@
 
 build()
 {
-    ./build.sh
+    ./build-release.sh
 }
 
 clean()
