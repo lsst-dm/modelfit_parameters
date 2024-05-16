@@ -1,7 +1,7 @@
 project(
   'lsst_modelfit_parameters',
   'cpp',
-  version : run_command('cat', meson.source_root() + '/VERSION', check: true).stdout().strip(),
+  version : files('VERSION'),
   license : 'GPL-3.0-or-later',
   default_options : ['warning_level=3']
 )
