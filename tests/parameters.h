@@ -57,7 +57,7 @@ struct NonNegativeParameter : public Parameter<double, NonNegativeParameter> {
 
 struct PositiveParameter : public Parameter<double, PositiveParameter> {
     static inline constexpr double _min = DBL_TRUE_MIN;
-    static inline const std::string _desc = "Non-negative, non-zero, potentially infinite parameter";
+    static inline const std::string _desc = "Positive, potentially infinite parameter";
     static inline const std::string _name = "positive";
     using Parameter<double, PositiveParameter>::Parameter;
 };
