@@ -33,8 +33,8 @@ namespace lsst::modelfit::parameters {
 template <typename T>
 class LogTransform : public Transform<T> {
 public:
-    std::string description() const { return "Natural (base e) logarithmic transform"; }
-    std::string repr([[maybe_unused]] bool name_keywords = false,
+    std::string description() const override { return "Natural (base e) logarithmic transform"; }
+    std::string repr(bool = false,
                      const std::string_view& namespace_separator = Object::CC_NAMESPACE_SEPARATOR
                      ) const override {
         return type_name_str<LogTransform>(false, namespace_separator) + "()";
@@ -43,16 +43,16 @@ public:
         return type_name_str<LogTransform>(true) + "()";
     }
 
-    inline T derivative(T x) const { return 1./x; }
-    inline T forward(T x) const { return log(x); }
-    inline T reverse(T x) const { return exp(x); }
+    inline T derivative(T x) const override { return 1./x; }
+    inline T forward(T x) const override { return log(x); }
+    inline T reverse(T x) const override { return exp(x); }
 };
 
 template <typename T>
 class Log10Transform : public Transform<T> {
 public:
     std::string description() const override { return "Base 10 logarithmic transform"; }
-    std::string repr([[maybe_unused]] bool name_keywords = false,
+    std::string repr(bool = false,
                      const std::string_view& namespace_separator = Object::CC_NAMESPACE_SEPARATOR
                      ) const override {
         return type_name_str<Log10Transform>(false, namespace_separator) + "()";
@@ -61,9 +61,10 @@ public:
         return type_name_str<Log10Transform>(true) + "()";
     }
 
-    inline T derivative(T x) const { return 1./x; }
-    inline T forward(T x) const { return log10(x); }
-    inline T reverse(T x) const { return pow10(x); }
+    inline T derivative(T x) const override { return 1./x; }
+    inline T forward(T x) const override { return log10(x); }
+    // pow10 is missing on macos
+    inline T reverse(T x) const override { return pow(10.0, x); }
 };
 }
 
