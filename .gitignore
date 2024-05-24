@@ -49,3 +49,6 @@ config.log
 .sconsign.dblite
 # I don't know why sconsUtils even creates this directory
 ups/__pycache__
+
+# eups build
+_eupspkg/
