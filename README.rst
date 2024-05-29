@@ -20,7 +20,7 @@ EUPS build
 ##########
 
 To build with `eups <https://github.com/RobertLuptonTheGood/eups>`_ for use
-with the Rubin/LSST `Science Pipelines <https://https://pipelines.lsst.io/>`_,
+with the Rubin/LSST `Science Pipelines <https://pipelines.lsst.io/>`_,
 call:
 
 .. code-block:: sh
@@ -29,7 +29,24 @@ call:
    eupspkg -e -v 1 config
    eupspkg -e -v 1 build
 
-Other build types
+If testing a ticket with Jenkins, see full instructions with more steps in the
+`developer guide <https://developer.lsst.io/stack/packaging-third-party-eups-dependencies.html#testing-the-package>`_.
+
+Doc build
+#########
+
+Sphinx package documentation is built by meson using
+`documenteer <https://github.com/lsst-sqre/documenteer/>`_, if available.
+Since this module has no Python bindings of its own (yet), these docs are not
+very useful.
+
+C++ Doxygen docs are built with scons using
+`sconsUtils <https://github.com/lsst/sconsUtils>`_, if available, either by
+calling eupspkg install or manually running scons.
+sconsUtils' ``tickets/DM-44144`` branch can be pip-installed outside of the
+Science Pipelines (the next section).
+
+Standalone builds
 #################
 
 A full example setup script is provided in ``setup_conda.sh``.
