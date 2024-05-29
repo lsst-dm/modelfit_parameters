@@ -42,3 +42,13 @@ compile_commands.json
 *.exe
 *.out
 *.app
+
+# SCons
+config.log
+.sconf_temp
+.sconsign.dblite
+# I don't know why sconsUtils even creates this directory
+ups/__pycache__
+
+# eups build
+_eupspkg/

@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,8 +22,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_LIMITS_H
-#define PARAMETERS_LIMITS_H
+#ifndef LSST_MODELFIT_PARAMETERS_LIMITS_H
+#define LSST_MODELFIT_PARAMETERS_LIMITS_H
 
 #include <cctype>
 #include <limits>
@@ -33,10 +34,10 @@
 #include "transform.h"
 #include "type_name.h"
 
-namespace parameters {
+namespace lsst::modelfit::parameters {
 
 /**
- * @brief Limits for a given parameter value.
+ * Range-based limits for parameter values.
  *
  * @tparam T The type of the value. Only floating point values are tested.
  */
@@ -49,16 +50,16 @@ private:
     constexpr void _check(const T& min, const T& max) const {
         if (std::isnan(min) || std::isnan(max))
             throw std::runtime_error(str() + " can't be initialized with NaN limits");
-        if (!(min <= max)) throw std::runtime_error(str() + " can't be initialized with !(min <= max)");
+        if (!(min <= max)) throw std::invalid_argument(str() + " can't be initialized with !(min <= max)");
     }
 
     inline void _check_min(const T& min) const {
-        if (std::isnan(min)) throw std::runtime_error(str() + " set_min given NaN");
-        if (!(min <= _max)) throw std::runtime_error(str() + " set_min !(min_new <= max)");
+        if (std::isnan(min)) throw std::invalid_argument(str() + " set_min given NaN");
+        if (!(min <= _max)) throw std::invalid_argument(str() + " set_min !(min_new <= max)");
     }
     inline void _check_max(const T& max) const {
-        if (std::isnan(max)) throw std::runtime_error(str() + " set_max given NaN");
-        if (!(max >= _min)) throw std::runtime_error(str() + " set_max !(min <= max_new)");
+        if (std::isnan(max)) throw std::invalid_argument(str() + " set_max given NaN");
+        if (!(max >= _min)) throw std::invalid_argument(str() + " set_max !(min <= max_new)");
     }
 
 public:
@@ -91,18 +92,18 @@ public:
         _max = max;
     };
 
-    std::string repr(bool name_keywords = false) const override {
-        return "Limits"
-               + (name_keywords ? std::to_string(std::toupper(std::string(type_name<T>())[0]))
-                                : "<" + std::string(type_name<T>()) + ">")
-               + "(" + (name_keywords ? "min=" : "") + std::to_string(_min) + ", "
-               + (name_keywords ? "max=" : "") + std::to_string(_max) + ", " + (name_keywords ? "name='" : "")
-               + name + "')";
+    std::string repr(bool name_keywords = false,
+                     const std::string_view& namespace_separator = CC_NAMESPACE_SEPARATOR) const override {
+        return type_name_str<Limits<T>>(false, namespace_separator) + "(" + (name_keywords ? "min=" : "")
+               + std::to_string(_min) + ", " + (name_keywords ? "max=" : "") + std::to_string(_max) + ", "
+               + (name_keywords ? "name='" : "") + name + "')";
     }
     std::string str() const override {
-        return "Limits(" + std::to_string(_min) + ", " + std::to_string(_max) + ", '" + name + "')";
+        return type_name_str<Limits<T>>(true) + "(" + std::to_string(_min) + ", " + std::to_string(_max)
+               + ", '" + name + "')";
     }
 
+    /// Initialize limits from the minimum and maximum value.
     Limits(T min = -std::numeric_limits<T>::infinity(), T max = std::numeric_limits<T>::infinity(),
            std::string name_ = "")
             : _min(min), _max(max), name(name_) {
@@ -112,5 +113,5 @@ public:
     ~Limits(){};
 };
 
-}  // namespace parameters
-#endif  // PARAMETERS_LIMITS_H
+}  // namespace lsst::modelfit::parameters
+#endif  // LSST_MODELFIT_PARAMETERS_LIMITS_H

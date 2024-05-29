@@ -1,3 +1,4 @@
+// -*- LSST-C++ -*-
 /*
  * This file is part of parameters.
  *
@@ -21,17 +22,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_UNIT_H
-#define PARAMETERS_UNIT_H
+#ifndef LSST_MODELFIT_PARAMETERS_H
+#define LSST_MODELFIT_PARAMETERS_H
 
-#include <string>
+#include "parameters/limits.h"
+#include "parameters/object.h"
+#include "parameters/parameter.h"
+#include "parameters/transform.h"
+#include "parameters/type_name.h"
+#include "parameters/unit.h"
 
-namespace parameters {
-
-class Unit {
-public:
-    virtual std::string get_name() const = 0;
-    virtual ~Unit() = default;
-};
-}  // namespace parameters
-#endif  // PARAMETERS_PARAMETER_H
+#endif  // LSST_MODELFIT_PARAMETERS_H

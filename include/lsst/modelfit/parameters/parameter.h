@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,8 +22,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_PARAMETER_H
-#define PARAMETERS_PARAMETER_H
+#ifndef LSST_MODELFIT_PARAMETERS_PARAMETER_H
+#define LSST_MODELFIT_PARAMETERS_PARAMETER_H
 
 #include <cmath>
 #include <iostream>
@@ -38,7 +39,7 @@
 #include "type_name.h"
 #include "unit.h"
 
-namespace parameters {
+namespace lsst::modelfit::parameters {
 
 /**
  * @brief Interface for parameters with values and metadata.
@@ -47,12 +48,11 @@ namespace parameters {
  * description, unit, as well as optional limits and a transforming function.
  * This class is intended for use in numerical optimization.
  *
- * Notes
- *
- * This base class exists partly because e.g. Python bindings can't understand
- * CRTP. It is probably unnecessary in C++ and comes with a performance hit.
- *
  * @tparam T The type of the value. Only floating point values are tested.
+ *
+ * @note This base class exists partly because e.g. Python bindings can't
+ * understand CRTP. It is probably unnecessary (albeit convenient) in C++
+ * and comes with a performance cost.
  */
 template <typename T>
 class ParameterBase : public Object {
@@ -100,7 +100,7 @@ public:
     /// Set the limits for this parameter instance.
     virtual void set_limits(std::shared_ptr<const Limits<T>> limits) = 0;
     /// Set the transforming function for this parameter instance.
-    virtual void set_transform(const std::shared_ptr<const Transform<T>> transform) = 0;
+    virtual void set_transform(std::shared_ptr<const Transform<T>> transform) = 0;
     /// Set the untransformed value for this parameter instance.
     virtual void set_value(T value) = 0;
     /// Set the transformed value for this parameter instance.
@@ -115,11 +115,11 @@ public:
     }
 
     friend bool operator!=(const ParameterBase<T>& first, const ParameterBase<T>& second) {
-        return !(first == second);
+        return &first != &second;
     }
 
     friend bool operator<(const ParameterBase<T>& first, const ParameterBase<T>& second) {
-        return &first < &second;
+        return std::less<const ParameterBase<T>*>{}(&first, &second) == true;
     }
 
     virtual ~ParameterBase() = default;
@@ -131,21 +131,23 @@ public:
  * This is a CRTP implementation of the ParameterBase interface, which allows
  * for concise, minimal-effort derived classes (see tests and examples).
  *
- * Notes
- *
- * CRTP performance benefits are likely lost by having an abstract base class
- * with virtual methods; see ParameterBase Notes. The remaining benefits from
- * CRTP are that derived classes can be implemented simply by defining
- * static members. The implementation thereof in this class is somewhat ugly.
- *
  * @tparam T The type of the value. Only floating point values are tested.
  * @tparam C The derived class.
+ *
+ * @note Parameters can be set as free/fixed when they are part of a model.
+ * This designation is indicative and does not prevent the parameter value
+ * from being changed by users.
+ *
+ * @note CRTP performance benefits are likely lost by having an abstract base
+ * class with virtual methods; see ParameterBase Notes. This may be obviated
+ * by future compiler improvements.
+ *
+ * @note The main benefit of CRTP left is that derived classes can be
+ * implemented just by defining static members. The implementation thereof in
+ * this class is not trivial, however.
  */
 template <typename T, class C>
 class Parameter : public ParameterBase<T>, public std::enable_shared_from_this<C> {
-public:
-    using SetC = std::set<std::shared_ptr<C>>;
-
 private:
     // These classes can store the default const Limits/Transform refs,
     // in case the unique_ptr thereof is null.
@@ -162,22 +164,30 @@ private:
         Transformer(const Transform<T>& transform_in) : transform(transform_in){};
     };
 
+    /// The default value for this type of Parameter
     static constexpr T _default = 0;
+    /// The minimum valid value (inclusive) for this type of Parameter
     static constexpr T _min = -std::numeric_limits<T>::infinity();
+    /// The maximum valid value (inclusive) for this type of Parameter
     static constexpr T _max = std::numeric_limits<T>::infinity();
+    /// Whether this Parameter is a linear parameter in a model
     static constexpr bool _linear = false;
-
+    /// Whether this Parameter is a free parameter in a model
     bool _free = true;
+    /// A Limiter to further restrict this parameter's values
     std::unique_ptr<Limiter> _limiter;
+    /// A Transformer to remap this parameter's value
     std::unique_ptr<Transformer> _transformer;
-
+    /// A descriptive label for this parameter
     std::string _label;
-
+    /// The Limits for this parameter, if not default
     std::shared_ptr<const Limits<T>> _limits_ptr;
+    /// The Transform for this parameter, if not default
     std::shared_ptr<const Transform<T>> _transform_ptr;
+    /// The Unit for this parameter's untransformed value
     std::shared_ptr<const Unit> _unit_ptr;
 
-    // Set the untransformed value, checking limits
+    /// Set the untransformed value, checking limits
     void _set_value(T value) {
         if (!(get_limits().check(value)))
             throw std::runtime_error(this->str() + "Value=" + std::to_string(value)
@@ -235,7 +245,11 @@ public:
         return this->get_transform().derivative(this->get_value());
     }
     /// Get the name of the derived type of this
-    static const std::string get_type_name() { return std::string(type_name<C>()); }
+    static const std::string get_type_name(bool strip_namespace_separator = false,
+                                           const std::string_view& namespace_separator
+                                           = detail::NAMESPACE_SEPARATOR) {
+        return type_name_str<C>(strip_namespace_separator, namespace_separator);
+    }
 
     const Unit& get_unit() const override { return *_unit_ptr; }
 
@@ -295,16 +309,17 @@ public:
         _unit_ptr = unit == nullptr ? nullptr : std::move(unit);
     }
 
-    std::string repr(bool name_keywords = false) const override {
-        return get_type_name() + "(" + (name_keywords ? "value=" : "") + std::to_string(_value) + ", "
-               + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
+    std::string repr(bool name_keywords = false, const std::string_view& namespace_separator
+                                                 = Object::CC_NAMESPACE_SEPARATOR) const override {
+        return get_type_name(false, namespace_separator) + "(" + (name_keywords ? "value=" : "")
+               + std::to_string(_value) + ", " + (name_keywords ? "limits=" : "") + get_limits().repr() + ", "
                + (name_keywords ? "transform=" : "") + get_transform().repr() + ", "
                + (name_keywords ? "fixed=" : "") + std::to_string(0 + get_fixed()) + ", "
                + (name_keywords ? "label='" : "'") + _label + "')";
     }
 
     std::string str() const override {
-        return get_type_name() + "(value=" + std::to_string(_value)
+        return get_type_name(true) + "(value=" + std::to_string(_value)
                + ", "
                // TODO: Implement equality operators for limits/transforms
                + ((&get_limits() == &get_limits_maximal()) ? "" : ("limits=" + get_limits().repr() + ", "))
@@ -312,10 +327,19 @@ public:
                           ? ""
                           : ("transform=" + get_transform().repr() + ", "))
                + (!get_fixed() ? "" : (std::string("fixed=") + std::to_string(0 + get_fixed()) + ", "))
-               + ((get_label() == "") ? "" : ("label='" + get_label() + "'"))
-	           + ")";
+               + ((get_label() == "") ? "" : ("label='" + get_label() + "'")) + ")";
     }
 
+    /**
+     * Initialize a Parameter.
+     *
+     * @param value The initial untransformed value.
+     * @param limits The untransformed value limits.
+     * @param transform The transformation to apply to values.
+     * @param unit The unit of the untransformed value.
+     * @param fixed Whether the parameter is fixed in models.
+     * @param label A descriptive label for the parameter.
+     */
     Parameter(T value = _get_default(), std::shared_ptr<const Limits<T>> limits = nullptr,
               const std::shared_ptr<const Transform<T>> transform = nullptr,
               std::shared_ptr<const Unit> unit = nullptr, bool fixed = false, std::string label = "")
@@ -329,5 +353,5 @@ public:
     }
     ~Parameter(){};
 };
-}  // namespace parameters
-#endif  // PARAMETERS_PARAMETER_H
+}  // namespace lsst::modelfit::parameters
+#endif  // LSST_MODELFIT_PARAMETERS_PARAMETER_H

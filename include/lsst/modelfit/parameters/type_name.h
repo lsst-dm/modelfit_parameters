@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,15 +22,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_TYPE_NAME_H
-#define PARAMETERS_TYPE_NAME_H
+#ifndef LSST_MODELFIT_PARAMETERS_TYPE_NAME_H
+#define LSST_MODELFIT_PARAMETERS_TYPE_NAME_H
 
 #include <string>
 #include <string_view>
 
-namespace parameters {
+namespace lsst::modelfit::parameters {
 
-// https://stackoverflow.com/questions/81870/is-it-possible-to-print-a-variables-type-in-standard-c/64490578#64490578
 template <typename T>
 constexpr std::string_view type_name();
 
@@ -64,8 +64,19 @@ constexpr std::size_t wrapped_type_name_suffix_length() {
            - type_name<type_name_prober>().length();
 }
 
+constexpr std::string_view NAMESPACE_SEPARATOR = "::";
+constexpr auto NAMESPACE_SEPARATOR_LEN = NAMESPACE_SEPARATOR.size();
+
 }  // namespace detail
 
+/**
+ * Get a string representation of an arbitrary C++ type.
+ *
+ * @tparam T The type to stringify
+ * @return A string representation of the type's name
+ *
+ * @note Adapted from https://stackoverflow.com/a/64490578
+ */
 template <typename T>
 constexpr std::string_view type_name() {
     constexpr auto wrapped_name = detail::wrapped_type_name<T>();
@@ -75,10 +86,34 @@ constexpr std::string_view type_name() {
     return wrapped_name.substr(prefix_length, type_name_length);
 }
 
+/**
+ * Get a string representation of an arbitrary C++ type, potentially modifying
+ * its namespace prefix.
+ *
+ * @tparam T The type to stringify.
+ * @param strip_namespace Whether to strip the namespace prefix entirely.
+ * @param namespace_str A string to replace the standard C++ namespace
+ *      separator (i.e. ::) with; generally . for Python.
+ * @return A string representation of the type's name, with modified namespace
+ *      prefix.
+ */
 template <typename T>
-const std::string type_name_str() {
-    return std::string(type_name<T>());
+std::string type_name_str(bool strip_namespace = false,
+                          const std::string_view& namespace_str = detail::NAMESPACE_SEPARATOR) {
+    std::string name = std::string(type_name<T>());
+    if (strip_namespace) {
+        return name.substr(name.find_last_of(':') + 1, std::string::npos);
+    } else if (namespace_str != detail::NAMESPACE_SEPARATOR) {
+        auto pos = name.find(detail::NAMESPACE_SEPARATOR, 0);
+        const auto n_replace = namespace_str.size();
+        while (pos != std::string::npos) {
+            name.replace(pos, detail::NAMESPACE_SEPARATOR_LEN, namespace_str);
+            pos += n_replace;
+            pos = name.find(detail::NAMESPACE_SEPARATOR, pos);
+        }
+    }
+    return name;
 }
 
-}  // namespace parameters
+}  // namespace lsst::modelfit::parameters
 #endif

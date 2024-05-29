@@ -25,29 +25,24 @@
 
 #include "doctest.h"
 
-#include <limits>
-
-#include "lsst/modelfit/parameters/limits.h"
+#include "transforms.h"
 
 namespace mod_params = lsst::modelfit::parameters;
 
-TEST_CASE("Limits") {
-    double inf = std::numeric_limits<double>::infinity();
-    auto limits_full = mod_params::Limits<double>();
-    CHECK_EQ(limits_full.check(-inf), true);
-    CHECK_EQ(limits_full.check(inf), true);
-    CHECK_EQ(limits_full.get_min(), -inf);
-    CHECK_EQ(limits_full.get_max(), inf);
-    auto limits_minmax = mod_params::Limits<double>(std::numeric_limits<double>::min(),
-                                                    std::numeric_limits<double>::max());
-    CHECK_EQ(limits_minmax.check(-inf), false);
-    CHECK_EQ(limits_minmax.check(inf), false);
-    auto limits = mod_params::Limits<double>(0, 0, "zero");
-    CHECK_EQ(limits.check(0), true);
-    CHECK_EQ(limits.check(-1), false);
-    CHECK_EQ(limits.check(1), false);
-    CHECK_EQ(limits.clip(-1), 0);
-    CHECK_EQ(limits.clip(1), 0);
-    CHECK_GT(limits.repr().size(), 0);
-    CHECK_GT(limits.str().size(), 0);
+TEST_CASE("Log10Transform") {
+    auto transform = mod_params::Log10Transform<double>();
+    CHECK_EQ(transform.forward(1.0), 0.);
+    CHECK_LT(std::abs(transform.forward(10.0) - 1.), 1e-12);
+    CHECK_EQ(transform.repr(), "lsst::modelfit::parameters::Log10Transform<double>()");
+    CHECK_EQ(transform.repr(true, "."), "lsst.modelfit.parameters.Log10Transform<double>()");
+    CHECK_EQ(transform.str(), "Log10Transform<double>()");
+}
+
+TEST_CASE("UnitTransform") {
+    auto transform = mod_params::UnitTransform<double>();
+    CHECK_EQ(transform.forward(1.), 1.);
+    CHECK_EQ(transform.reverse(-1.), -1.);
+    CHECK_EQ(transform.repr(), "lsst::modelfit::parameters::UnitTransform<double>()");
+    CHECK_EQ(transform.repr(true, "."), "lsst.modelfit.parameters.UnitTransform<double>()");
+    CHECK_EQ(transform.str(), "UnitTransform<double>()");
 }

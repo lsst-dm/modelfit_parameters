@@ -1,5 +1,6 @@
+// -*- LSST-C++ -*-
 /*
- * This file is part of parameters.
+ * This file is part of modelfit_parameters.
  *
  * Developed for the LSST Data Management System.
  * This product includes software developed by the LSST Project
@@ -21,16 +22,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PARAMETERS_TRANSFORM_H
-#define PARAMETERS_TRANSFORM_H
+#ifndef LSST_MODELFIT_PARAMETERS_TRANSFORM_H
+#define LSST_MODELFIT_PARAMETERS_TRANSFORM_H
 
 #include <cmath>
 #include <memory>
 #include <string>
 
 #include "object.h"
+#include "type_name.h"
 
-namespace parameters {
+namespace lsst::modelfit::parameters {
 
 /**
  * @brief A reversible transformation of a real scalar value.
@@ -63,17 +65,18 @@ public:
         static const auto transform = UnitTransform<T>();
         return transform;
     }
-    std::string repr(__attribute__((unused)) bool name_keywords = false) const override {
-        return "UnitTransform()";
+    std::string repr(bool = false, const std::string_view& namespace_separator
+                                   = Object::CC_NAMESPACE_SEPARATOR) const override {
+        return type_name_str<UnitTransform<T>>(false, namespace_separator) + "()";
     }
-    std::string str() const override { return "UnitTransform()"; }
+    std::string str() const override { return type_name_str<UnitTransform<T>>(true) + "()"; }
 
-    inline T derivative(T) const { return 1; }
-    inline T forward(T x) const { return x; }
-    inline T reverse(T x) const { return x; }
+    inline T derivative(T) const override { return 1; }
+    inline T forward(T x) const override { return x; }
+    inline T reverse(T x) const override { return x; }
 
     ~UnitTransform() = default;
 };
 
-}  // namespace parameters
-#endif  // PARAMETERS_TRANSFORM_H
+}  // namespace lsst::modelfit::parameters
+#endif  // LSST_MODELFIT_PARAMETERS_TRANSFORM_H

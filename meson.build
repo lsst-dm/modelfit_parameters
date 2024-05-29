@@ -1,15 +1,11 @@
 project(
-  'parameters',
+  'lsst_modelfit_parameters',
   'cpp',
-  version : '0.1.0',
+  version : files('VERSION'),
   license : 'GPL-3.0-or-later',
   default_options : ['warning_level=3']
 )
-project_description = 'Define parameters with limits and transforms for parametric modelling'
-
-project_test_files = [
-    'tests/parameter.cc',
-]
+project_description = 'Define parameters with limits and transforms for model fitting'
 
 # Target
 public_headers = include_directories('include')
@@ -27,7 +23,7 @@ subdir('include')
 eups = find_program('eups', required: false)
 has_eups = eups.found()
 if has_eups
-    has_eups = run_command('eups', 'list', 'gauss2d', check: false).returncode() == 0
+    has_eups = run_command('eups', 'list', 'modelfit_parameters', check: false).returncode() == 0
 endif
 
 if not has_eups
@@ -42,5 +38,22 @@ endif
 # Unit Tests
 subdir('tests')
 
-# Build docs
+# Build package docs (optional)
 subdir('doc')
+
+# Build doxygen docs (done by eupspkg install if has_eups)
+if not has_eups
+    pymod = import('python')
+    python = pymod.find_installation(
+        'python3',
+        required : false,
+        modules: ['lsst.sconsUtils'],
+    )
+    has_py3 = python.found()
+    scons = find_program('scons', required: false)
+    has_scons = scons.found()
+    if has_scons and has_py3
+        message('Running SCons to build docs; see ' + meson.build_root() + '/meson-logs/meson-log.txt for output')
+        run_command('sh', '-c', 'cd $MESON_SOURCE_ROOT && echo $PWD && scons', check: false, capture: true)
+    endif
+endif
