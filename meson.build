@@ -23,7 +23,7 @@ subdir('include')
 eups = find_program('eups', required: false)
 has_eups = eups.found()
 if has_eups
-    has_eups = run_command('eups', 'list', 'gauss2d', check: false).returncode() == 0
+    has_eups = run_command('eups', 'list', 'modelfit_parameters', check: false).returncode() == 0
 endif
 
 if not has_eups
