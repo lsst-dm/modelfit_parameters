@@ -3,7 +3,7 @@ project(
   'cpp',
   version : files('VERSION'),
   license : 'GPL-3.0-or-later',
-  default_options : ['warning_level=3']
+  default_options : ['cpp_std=c++17', 'warning_level=3']
 )
 project_description = 'Define parameters with limits and transforms for model fitting'
 
