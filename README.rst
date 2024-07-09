@@ -25,6 +25,7 @@ call:
 
 .. code-block:: sh
    :name: build
+
    setup -jr .
    eupspkg -e -v 1 config
    eupspkg -e -v 1 build
